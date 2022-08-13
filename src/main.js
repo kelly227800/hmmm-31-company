@@ -10,7 +10,7 @@ import i18n from './lang' // Internationalization
 import './icons' // icon
 import './errorLog' // error log
 import * as filters from './filters' // global filters
-import './mock' // simulation data
+import './mock' // simulation data   模拟数据
 // font-awesome
 import 'font-awesome/css/font-awesome.css'
 /*

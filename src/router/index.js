@@ -2,12 +2,12 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import store from '@/store'
 import { Message } from 'element-ui'
-import NProgress from 'nprogress'
-import Layout from '@/module-dashboard/pages/layout'
+import NProgress from 'nprogress'   //进度条组件
+import Layout from '@/module-dashboard/pages/layout'  
 import { getToken } from '@/utils/auth'
 
 // 定义
-const _import = require('./import_' + process.env.NODE_ENV) // 懒加载 导包
+const _import = require('./import_' + process.env.NODE_ENV) // 懒加载 导包-----环境变量
 const whiteList = ['/login', '/authredirect'] // 白名单 无需跳转
 
 // 配置
@@ -30,7 +30,7 @@ NProgress.configure({ showSpinner: false }) // NProgress Configuration
     noCache: true                if true ,the page will no be cached(default is false)
   }
 **/
-export const constantRouterMap = [
+export const constantRouterMap = [//静态路由
   {
     path: '/login',
     component: _import('dashboard/pages/login'),
@@ -61,12 +61,12 @@ export const constantRouterMap = [
 /**
  * 配置路由
  **/
-const router = new Router({
+const router = new Router({//当切换到新路由时，想要页面滚到顶部
   // mode: 'history', // require service support
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
 })
-
+// 页面的登录限制
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
   if (getToken()) {
