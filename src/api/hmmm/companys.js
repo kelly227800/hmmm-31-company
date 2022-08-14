@@ -15,4 +15,4 @@ export const update = data => createAPI(`/companys/${data.id}`, 'put', data)
 export const remove = data => createAPI(`/companys/${data.id}`, 'delete', data)
 export const detail = data => createAPI(`/companys/${data.id}`, 'get', data)
 export const disabled = data =>
-  createAPI(`/companys/${data.id}/state`, 'post', data)
+  createAPI(`/companys/${data.id}/${data.state===1?0:1}`, 'post', data)
