@@ -6,18 +6,20 @@
         <div class="seachLeft">
           <el-input
             size="small"
-            v-model="username"
+            v-model.trim="params.username"
             placeholder="根据用户名搜索"
           ></el-input>
-          <el-button size="small">清空</el-button>
-          <el-button size="mini" type="primary">搜索</el-button>
+          <el-button size="small" @click="params.username = ''">清空</el-button>
+          <el-button size="mini" type="primary" @click="serchUser"
+            >搜索</el-button
+          >
         </div>
         <div class="seachLeft">
           <el-button
             size="mini"
             icon="el-icon-edit"
             type="success"
-            @click="addClick"
+            @click="visible = true"
           >
             新增用户
           </el-button>
@@ -25,7 +27,7 @@
       </div>
       <!-- 记录 -->
       <el-alert :closable="false" type="info" show-icon>
-        <template #title>共 {{ counts }} 条记录 </template>
+        <template #title>共 {{ total }} 条记录 </template>
       </el-alert>
       <!-- 表格 -->
       <el-table :data="tableData" style="width: 100%">
@@ -78,21 +80,26 @@
         </el-table-column>
       </el-table>
       <!-- 分页 -->
-      <PageTool></PageTool>
+      <el-row type="flex" justify="end" align="middle" style="height: 60px">
+        <el-pagination
+          background
+          layout="prev, pager, next,sizes,jumper"
+          :total="total"
+          :page-sizes="[10, 20, 30, 50]"
+          :page-size="params.pageSize"
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+        />
+      </el-row>
     </el-card>
     <!-- 添加用户弹框 -->
-    <UserAdd
-      ref="useradd"
-      :formBase="formBase"
-      :text="text"
-      :pageTitle="pageTitle"
-    ></UserAdd>
+    <UserAdd :visible.sync="visible" @add-success="getUserList"></UserAdd>
   </div>
 </template>
 
 <script>
 import PageTool from "../components/page-tool.vue";
-import UserAdd from "../components/user-add.vue";
+import UserAdd from "../components/AddUser.vue";
 import { list } from "@/api/base/users";
 
 export default {
@@ -100,7 +107,7 @@ export default {
     return {
       username: "", // 搜索框
       tableData: [{ date: "" }, { name: "" }],
-      dialogFormVisible: true,
+      visible: false,
       text: "123",
       pageTitle: "123",
       // 添加弹框的from绑定
@@ -113,15 +120,13 @@ export default {
         phone: "",
         introduction: "",
       },
-      text: "新增",
-      pageTitle: "用户",
       // 请求
-      pages: {
+      params: {
         page: 1,
         pagesize: 10,
-        keyword: "",
+        username: "",
       },
-      counts: 0,
+      total: 0,
       //
       tableData: [],
     };
@@ -135,15 +140,32 @@ export default {
   },
 
   methods: {
-    addClick() {
-      this.$refs.useradd.dialogFormVisible = true;
-      // console.log(this.$refs.useradd.dialogFormVisible);
-    },
+    // 获取用户列表
     async getUserList() {
-      const { data } = await list();
-      console.log(data);
+      const { data } = await list(this.params);
+      // console.log(data);
       this.tableData = data.list;
-      this.counts = data.counts;
+      this.total = data.counts;
+    },
+    // 更改每一页多少条的时候触发
+    handleSizeChange(val) {
+      console.log(val);
+      this.params.pagesize = val;
+      this.getUserList();
+    },
+    // 切换到不同页数的时候触发
+    handleCurrentChange(val) {
+      console.log(val);
+      this.params.page = val;
+      this.getUserList();
+    },
+    // 搜索用户
+    serchUser() {
+      console.log(this.params);
+      if (this.params.username == "") {
+        return this.$message.error("搜索不能为空");
+      }
+      this.getUserList();
     },
   },
 };
