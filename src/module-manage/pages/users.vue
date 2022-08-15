@@ -19,7 +19,7 @@
             size="mini"
             icon="el-icon-edit"
             type="success"
-            @click="visible = true"
+            @click="addUser"
           >
             新增用户
           </el-button>
@@ -54,6 +54,7 @@
         >
           <template slot-scope="{ row }">
             <el-button
+              @click="editUser(row)"
               style="
                 width: 40px;
                 height: 40px;
@@ -66,6 +67,7 @@
             />
             <el-button
               v-if="row.id !== 2"
+              @click="delUser(row)"
               style="
                 width: 40px;
                 height: 40px;
@@ -93,14 +95,19 @@
       </el-row>
     </el-card>
     <!-- 添加用户弹框 -->
-    <UserAdd :visible.sync="visible" @add-success="getUserList"></UserAdd>
+    <UserAdd
+      v-if="visible"
+      :visible.sync="visible"
+      :userItem="userItem"
+      @add-success="getUserList"
+    ></UserAdd>
   </div>
 </template>
 
 <script>
 import PageTool from "../components/page-tool.vue";
 import UserAdd from "../components/AddUser.vue";
-import { list } from "@/api/base/users";
+import { list, remove } from "@/api/base/users";
 
 export default {
   data() {
@@ -129,6 +136,7 @@ export default {
       total: 0,
       //
       tableData: [],
+      userItem: {},
     };
   },
   components: {
@@ -161,10 +169,27 @@ export default {
     },
     // 搜索用户
     serchUser() {
-      console.log(this.params);
-      if (this.params.username == "") {
-        return this.$message.error("搜索不能为空");
-      }
+      // console.log(this.params);
+      // if (this.params.username == "") {
+      //   return this.$message.error("搜索不能为空");
+      // }
+      this.getUserList();
+    },
+    // 编辑用户
+    editUser(row) {
+      // console.log(row);
+      this.userItem = row;
+      this.visible = true;
+    },
+    // 添加用户
+    addUser() {
+      this.userItem = {};
+      this.visible = true;
+    },
+    // 删除用户
+    async delUser(row) {
+      await remove(row);
+      this.$message.success("用户已删除");
       this.getUserList();
     },
   },

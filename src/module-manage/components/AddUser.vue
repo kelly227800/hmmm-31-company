@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { add } from "@/api/base/users";
+import { add, update } from "@/api/base/users";
 import { simple } from "@/api/base/permissions";
 export default {
   name: "AddUser",
@@ -78,6 +78,7 @@ export default {
         phone: "",
         role: "",
         username: "",
+        sex: 1,
         avatar:
           "https://c-ssl.dtstatic.com/uploads/blog/202106/21/20210621200041_d1642.thumb.1000_0.jpeg",
       },
@@ -134,22 +135,41 @@ export default {
       type: Boolean,
       default: false,
     },
+    userItem: {
+      type: Object,
+      default: () => ({}),
+    },
   },
   created() {
     this.simple();
+    console.log(this.userItem);
   },
 
   methods: {
+    // 权限组
     async simple() {
+      console.log(this.userItem.id);
+      if (this.userItem.id) {
+        // this.addForm = { ...this.userItem };
+        // 利用for in把父组件得值 赋值给子组件
+        for (let key in this.addForm) {
+          if (this.userItem[key]) {
+            this.addForm[key] = this.userItem[key];
+          }
+        }
+        //添加必须的属性
+        this.addForm.sex = 1;
+        this.addForm.id = this.userItem.id;
+      }
+      // 获取权限组
       const { data } = await simple();
-      console.log(data);
       this.powerList = data;
     },
     //隐藏
     onClose() {
       //   清除表单校验规则
       this.$refs.from.resetFields();
-      (this.addForm = {
+      this.addForm = {
         email: "",
         introduction: "",
         password: "",
@@ -157,23 +177,30 @@ export default {
         phone: "",
         role: "",
         username: "",
-        avatar:
-          "https://c-ssl.dtstatic.com/uploads/blog/202106/21/20210621200041_d1642.thumb.1000_0.jpeg",
-      }),
-        this.$emit("update:visible", false);
+      };
+      this.$emit("update:visible", false);
     },
     // 提交表单
     async onSubmit() {
       // 提交前校验
       this.$refs.from.validate();
-      try {
-        await add(this.addForm);
-        // console.log(data);
-        this.$message.success("添加成功");
+      // 修改
+      if (this.addForm.id) {
+        await update(this.addForm);
+        this.$message.success("修改成功");
         this.onClose();
         this.$emit("add-success");
-      } catch (error) {
-        console.log("未知错误");
+      } else {
+        // 添加
+        try {
+          await add(this.addForm);
+          // console.log(data);
+          this.$message.success("添加成功");
+          this.onClose();
+          this.$emit("add-success");
+        } catch (error) {
+          console.log("未知错误");
+        }
       }
     },
   },
