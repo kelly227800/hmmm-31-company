@@ -1,9 +1,53 @@
 <template>
-  <div class='container'>精选题库</div>
+  <div class="container">
+    <el-card class="box-card">
+      <QuestionNavbar />
+      <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
+        <el-tab-pane label="全部" name="all"
+          ><MainTable ref="main" :chkState="activeName"
+        /></el-tab-pane>
+        <el-tab-pane label="待审核" name="0"
+          ><MainTable ref="main" :chkState="activeName"
+        /></el-tab-pane>
+        <el-tab-pane label="已审核" name="1"
+          ><MainTable ref="main" :chkState="activeName"
+        /></el-tab-pane>
+        <el-tab-pane label="已拒绝" name="2"
+          ><MainTable ref="main" :chkState="activeName"
+        /></el-tab-pane>
+      </el-tabs>
+    </el-card>
+  </div>
 </template>
 
 <script>
-export default {}
+import QuestionNavbar from "./questions/components/QuestionNavbar.vue";
+import MainTable from "@/module-hmmm/pages/questions/components/MainTable.vue";
+import Cookies from "js-cookie";
+export default {
+  data() {
+    return {
+      activeName: Cookies.get("hmmm-activeName") || "all",
+    };
+  },
+  components: {
+    QuestionNavbar,
+    MainTable,
+  },
+  methods: {
+    handleClick() {
+      setTimeout(() => {
+        Cookies.set("hmmm-activeName", this.activeName);
+        this.$refs.main.getchoice();
+      });
+    },
+  },
+};
 </script>
 
-<style scoped lang='less'></style>
+<style scoped lang="less">
+.container {
+  padding: 0 10px;
+  margin: 10px 0;
+}
+</style>
