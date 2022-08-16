@@ -68,7 +68,11 @@
       </el-col>
       <el-col :span="12">
         <el-row type="flex" justify="end">
-          <el-button type="success" size="small" icon="el-icon-edit"
+          <el-button
+            type="success"
+            size="small"
+            icon="el-icon-edit"
+            @click="showAdd"
             >新增用户</el-button
           >
         </el-row>
@@ -111,7 +115,7 @@ export default {
         shortName: "", //企业简称
         state: "", //状态：1启用0禁用
       };
-      this.$emit("search", this.formCompany);
+      this.$emit("render", this.formCompany);
     },
     // 城市下拉框值改变的时候
     provincesFn(val) {
@@ -120,7 +124,11 @@ export default {
     },
     // 搜索按钮
     searchClick() {
-      this.$emit("search", this.formCompany);
+      this.$emit("render", this.formCompany);
+    },
+    // 新增用户按钮
+    showAdd() {
+      this.$emit("showAdd");
     },
   },
 };

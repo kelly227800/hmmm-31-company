@@ -2,7 +2,7 @@
   <el-card class="company-container">
     <!-- 头部表单部分 -->
     <div class="head-input">
-      <headInput @search="getCompanyInfo"></headInput>
+      <headInput @render="getCompanyInfo" @showAdd="showAdd"></headInput>
     </div>
     <!-- 中间提示部分 -->
     <div class="middle-alert">
@@ -19,6 +19,7 @@
         :tableData="tableData"
         @renderAgain="getCompanyInfo"
         :params="params"
+        @showChange="showChange"
       ></mainTable>
     </div>
     <!-- 底部页码部分 -->
@@ -36,11 +37,12 @@
       </el-row>
     </div>
     <!-- 弹层部分 -->
-    <!-- 新增 -->
-    <!-- <addDialog></addDialog> -->
-    <!-- 修改 -->
-    <!-- 状态 -->
-    <!-- 删除 -->
+    <!-- 新增、修改 -->
+    <addDialog
+      :visible.sync="dialogAddVisible"
+      @render="getCompanyInfo"
+      ref="dialog"
+    ></addDialog>
   </el-card>
 </template>
 
@@ -60,6 +62,7 @@ export default {
       },
       tableData: [], //表格需要的数据
       total: 0, //一共的条数
+      dialogAddVisible: false, //新建的弹层
     };
   },
 
@@ -96,6 +99,14 @@ export default {
     handleCurrentChange(val) {
       this.params.page = val;
       this.getCompanyInfo(this.params);
+    },
+    // 新增按钮触发新增弹层
+    showAdd() {
+      this.dialogAddVisible = true;
+    },
+    showChange(id) {
+      this.dialogAddVisible = true;
+      this.$refs.dialog.editDate(id);
     },
   },
 };

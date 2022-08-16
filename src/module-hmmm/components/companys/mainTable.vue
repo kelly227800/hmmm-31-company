@@ -42,6 +42,7 @@
             icon="el-icon-edit"
             circle
             plain
+            @click="showChange(scope.row.id)"
           ></el-button>
           <el-tooltip class="item" effect="dark" content="禁用" placement="top">
             <el-button
@@ -103,6 +104,10 @@ export default {
     formatterState(row, column, cellValue, index) {
       const findItem = status.find((item) => item.value == cellValue);
       return findItem ? findItem.label : "未知";
+    },
+    // 点击触发弹层
+    showChange(id) {
+      this.$emit("showChange", id);
     },
     // 点击删除按钮的时候
     delFn(row) {
