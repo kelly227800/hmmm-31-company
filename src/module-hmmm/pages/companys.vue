@@ -73,7 +73,7 @@ export default {
   },
 
   created() {
-    // alert('姚淑怡')
+    alert("姚淑怡");
     this.getCompanyInfo(this.params);
   },
 
