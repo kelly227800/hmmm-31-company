@@ -16,27 +16,33 @@
           <el-input v-model="formBase.company"></el-input>
           <p>https://www.tianyancha.com （在此可查询所属公司全称及简称）</p>
         </el-form-item>
-        <el-form-item label="城市" prop="province">
-          <el-select
-            style="width: 50%"
-            v-model="formBase.province"
-            @change="handleProvince"
-          >
-            <el-option
-              :label="item"
-              :value="item"
-              v-for="(item, index) in cityList"
-              :key="index"
-            ></el-option>
-          </el-select>
-          <el-select style="width: 50%" v-model="formBase.city">
-            <el-option
-              :label="item"
-              :value="item"
-              v-for="(item, index) in areaList"
-              :key="index"
-            ></el-option>
-          </el-select>
+        <el-form-item label="城市" :inline="true">
+          <div style="display: flex">
+            <el-form-item prop="province" style="width: 50%">
+              <el-select
+                style="width: 100%"
+                v-model="formBase.province"
+                @change="handleProvince"
+              >
+                <el-option
+                  :label="item"
+                  :value="item"
+                  v-for="(item, index) in cityList"
+                  :key="index"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item prop="city" style="width: 50%">
+              <el-select style="width: 100%" v-model="formBase.city">
+                <el-option
+                  :label="item"
+                  :value="item"
+                  v-for="(item, index) in areaList"
+                  :key="index"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </div>
         </el-form-item>
         <el-form-item label="方向（企业标签）" prop="tags">
           <el-input v-model="formBase.tags"></el-input>
@@ -69,6 +75,13 @@ export default {
     },
   },
   data() {
+    var validatorCity = (rule, value, callback) => {
+      if (!this.formBase.province) {
+        callback(new Error(" "));
+      } else {
+        callback();
+      }
+    };
     return {
       formBase: {
         isFamous: true, //是否为名企
@@ -89,6 +102,7 @@ export default {
         province: [
           { required: true, message: "请选择省份", trigger: "change" },
         ],
+        city: [{ validator: validatorCity, trigger: "change" }],
         tags: [{ required: true, message: "请输入标签", trigger: "blur" }],
         remarks: [{ required: true, message: "请输入", trigger: "blur" }],
       },
