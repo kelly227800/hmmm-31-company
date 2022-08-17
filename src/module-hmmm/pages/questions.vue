@@ -2,21 +2,21 @@
   <div class="container">
     <el-card class="box-card">
       <QuestionNavbar />
-      <MainTable />
+      <SelectedMainTable />
     </el-card>
   </div>
 </template>
 
 <script>
 import QuestionNavbar from "./questions/components/QuestionNavbar.vue";
-import MainTable from "@/module-hmmm/pages/questions/components/MainTable.vue";
+import SelectedMainTable from "@/module-hmmm/pages/questions/components/SelectedMainTable.vue";
 export default {
   data() {
     return {};
   },
   components: {
     QuestionNavbar,
-    MainTable,
+    SelectedMainTable,
   },
   created() {},
   methods: {},

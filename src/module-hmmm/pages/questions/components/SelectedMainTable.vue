@@ -76,13 +76,33 @@
       <!-- slot-scope="scope" -->
       <el-table-column prop="address" label="操作" width="200" align="center">
         <template slot-scope="{ row }">
-          <div class="btn">
-            <span @click="Previewfn">预览</span>
-            <span>审核</span>
-            <span @click="upgo(row.id)">修改</span>
-            <span>上架</span>
-            <span @click="del(row.id)">删除</span>
-          </div>
+          <el-button
+            type="primary"
+            icon="el-icon-view"
+            circle
+            plain
+            @click="Previewfn"
+          ></el-button>
+          <el-button
+            type="success"
+            icon="el-icon-edit"
+            circle
+            plain
+            @click="upgo(row.id)"
+          ></el-button>
+          <el-button
+            type="danger"
+            icon="el-icon-delete"
+            circle
+            plain
+            @click="del(row.id)"
+          ></el-button
+          ><el-button
+            type="warning"
+            icon="el-icon-check"
+            circle
+            plain
+          ></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -109,7 +129,14 @@
       :visible.sync="dialogVisible"
       width="30%"
     >
-      <span>此操作将永久删除该题目, 是否继续?</span>
+      <el-alert
+        title="此操作将永久删除该题目, 是否继续?"
+        type="warning"
+        show-icon
+        :closable="false"
+        style="background-color: #fff"
+      >
+      </el-alert>
       <span slot="footer" class="dialog-footer">
         <el-button @click="onclose">取 消</el-button>
         <el-button type="primary" @click="onyes">确 定</el-button>
@@ -207,24 +234,28 @@ export default {
     async onyes() {
       await remove({ id: this.delid });
       this.$message.success("删除成功");
-      this.getchoice()
+      this.getchoice();
       this.onclose();
     },
   },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 /* ::v-deep .el-table .cell {
   text-align: center;
 } */
 ::v-deep .el-table th.is-leaf {
   border-bottom: 2px solid #e8e8e8 !important;
 }
-.btn {
-  color: #409eff;
-  display: flex;
-  justify-content: space-between;
-  cursor: pointer;
+::v-deep .el-dialog__header {
+  z-index: 999;
+  background-color: #fff;
+  .el-dialog__title {
+    color: #000;
+  }
+}
+.el-alert__content {
+  color: #000;
 }
 </style>

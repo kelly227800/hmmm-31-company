@@ -3,19 +3,12 @@
     <el-card class="box-card">
       <QuestionNavbar />
       <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-        <el-tab-pane label="全部" name="all"
-          ><MainTable ref="main" :chkState="activeName"
-        /></el-tab-pane>
-        <el-tab-pane label="待审核" name="0"
-          ><MainTable ref="main" :chkState="activeName"
-        /></el-tab-pane>
-        <el-tab-pane label="已审核" name="1"
-          ><MainTable ref="main" :chkState="activeName"
-        /></el-tab-pane>
-        <el-tab-pane label="已拒绝" name="2"
-          ><MainTable ref="main" :chkState="activeName"
-        /></el-tab-pane>
+        <el-tab-pane label="全部" name="all"></el-tab-pane>
+        <el-tab-pane label="待审核" name="0"></el-tab-pane>
+        <el-tab-pane label="已审核" name="1"></el-tab-pane>
+        <el-tab-pane label="已拒绝" name="2"></el-tab-pane>
       </el-tabs>
+      <MainTable ref="main" :chkState="activeName" />
     </el-card>
   </div>
 </template>
@@ -35,11 +28,9 @@ export default {
     MainTable,
   },
   methods: {
-    handleClick() {
-      setTimeout(() => {
-        Cookies.set("hmmm-activeName", this.activeName);
-        this.$refs.main.getchoice();
-      });
+    async handleClick() {
+      Cookies.set("hmmm-activeName", this.activeName);
+      await this.$refs.main.getchoice();
     },
   },
 };
