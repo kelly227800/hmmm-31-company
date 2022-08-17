@@ -30,6 +30,20 @@ Vue.use(hmmm, store)
 /*
  * 注册 - 组件
  */
+// 富文本
+import QuillEditor from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+Vue.use(QuillEditor)
+
+// 视频
+import Video from 'video.js'
+import 'video.js/dist/video-js.css'
+
+Vue.prototype.$video = Video
+
 
 // 饿了么
 Vue.use(Element, {

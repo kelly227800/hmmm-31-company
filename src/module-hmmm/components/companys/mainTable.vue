@@ -141,7 +141,10 @@ export default {
         type: "warning",
       })
         .then(async () => {
-          await disabled(row);
+          await disabled({
+            id: row.id,
+            state: row.state === 1 ? 0 : 1,
+          });
           this.$message({
             type: "success",
             message: "操作成功!",

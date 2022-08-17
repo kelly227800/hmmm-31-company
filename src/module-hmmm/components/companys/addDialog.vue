@@ -64,7 +64,7 @@
   </div>
 </template>
 <script>
-import { add, detail } from "@/api/hmmm/companys.js";
+import { add, detail, update } from "@/api/hmmm/companys.js";
 import { provinces, citys } from "@/api/hmmm/citys.js";
 export default {
   name: "CompanysAdd",
@@ -107,10 +107,12 @@ export default {
         remarks: [{ required: true, message: "请输入", trigger: "blur" }],
       },
       params: this.$parent.$parent.params,
+      flag: 0, //0表示添加，1表示修改
     };
   },
   computed: {
     dialogTitle() {
+      this.flag = this.formBase.shortName ? 1 : 0;
       return this.formBase.shortName ? "编辑用户" : "添加用户";
     },
   },
@@ -138,22 +140,21 @@ export default {
     async onSave() {
       await this.$refs.dataForm.validate();
       try {
-        await add(this.formBase);
+        if (this.flag) {
+          await update(this.formBase);
+        } else {
+          await add(this.formBase);
+        }
         this.onClose();
         this.$emit("render", this.params);
       } catch (err) {
-        this.$message.error("添加失败");
+        this.$message.error("操作失败");
       }
     },
     async editDate(id) {
       const res = await detail({ id });
-      // console.log(res);
-      this.formBase.shortName = res.data.shortName;
-      this.formBase.company = res.data.company;
-      this.formBase.province = res.data.province;
-      this.formBase.city = res.data.city;
-      this.formBase.tags = res.data.tags;
-      this.formBase.remarks = res.data.remarks;
+      this.formBase = res.data;
+      this.formBase.isFamous = this.formBase.isFamous ? true : false;
     },
   },
 };
