@@ -8,11 +8,28 @@
           <a
             href="javascript:;"
             class="url"
-            @click="clickURL(scope.row)"
+            @click="videoDialog(scope.row)"
             v-if="scope.row.videoURL !== null"
+            ref="click"
           >
             <i class="el-icon-film"></i>
           </a>
+          <el-dialog
+            title="视频"
+            :visible.sync="dialogVideoVisible"
+            width="700px"
+            @close="closeDialog"
+          >
+            <!-- autoplay添加自动播放会多一重声音 -->
+            <video
+              :src="videoUrl"
+              controls
+              ref="dialogVideo"
+              preload="none"
+              width="640px"
+              height="348px"
+            ></video>
+          </el-dialog>
         </template>
       </el-table-column>
       <el-table-column prop="visits" label="阅读数"></el-table-column>
@@ -58,13 +75,6 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- <video
-      src="https://v-cdn.zjol.com.cn/276984.mp4"
-      ref="vueMiniPlayer"
-    ></video> -->
-    <video id="myVideo" class="video-js">
-      <source src="https://v-cdn.zjol.com.cn/276984.mp4" type="video/mp4" />
-    </video>
   </div>
 </template>
 
@@ -78,6 +88,8 @@ export default {
     return {
       params: this.$parent.$parent.params,
       showState: "",
+      dialogVideoVisible: false,
+      videoUrl: "",
     };
   },
 
@@ -87,8 +99,6 @@ export default {
       default: () => [],
     },
   },
-
-  created() {},
 
   methods: {
     // 状态 表单里面下拉框的一个转换
@@ -135,9 +145,13 @@ export default {
     showMore(id) {
       this.$emit("showMore", id);
     },
-    // 视频跳转问题
-    clickURL(row) {
-      console.log(row.videoURL);
+    // 视频
+    videoDialog(row) {
+      this.dialogVideoVisible = true;
+      this.videoUrl = row.videoURL;
+    },
+    closeDialog() {
+      this.videoUrl = "";
     },
   },
 };

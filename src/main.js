@@ -38,12 +38,6 @@ import 'quill/dist/quill.bubble.css'
 
 Vue.use(QuillEditor)
 
-// 视频
-import Video from 'video.js'
-import 'video.js/dist/video-js.css'
-
-Vue.prototype.$video = Video
-
 
 // 饿了么
 Vue.use(Element, {
