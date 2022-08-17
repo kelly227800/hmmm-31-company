@@ -16,27 +16,33 @@
           <el-input v-model="formBase.company"></el-input>
           <p>https://www.tianyancha.com （在此可查询所属公司全称及简称）</p>
         </el-form-item>
-        <el-form-item label="城市" prop="province">
-          <el-select
-            style="width: 50%"
-            v-model="formBase.province"
-            @change="handleProvince"
-          >
-            <el-option
-              :label="item"
-              :value="item"
-              v-for="(item, index) in cityList"
-              :key="index"
-            ></el-option>
-          </el-select>
-          <el-select style="width: 50%" v-model="formBase.city">
-            <el-option
-              :label="item"
-              :value="item"
-              v-for="(item, index) in areaList"
-              :key="index"
-            ></el-option>
-          </el-select>
+        <el-form-item label="城市" :inline="true">
+          <div style="display: flex">
+            <el-form-item prop="province" style="width: 50%">
+              <el-select
+                style="width: 100%"
+                v-model="formBase.province"
+                @change="handleProvince"
+              >
+                <el-option
+                  :label="item"
+                  :value="item"
+                  v-for="(item, index) in cityList"
+                  :key="index"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item prop="city" style="width: 50%">
+              <el-select style="width: 100%" v-model="formBase.city">
+                <el-option
+                  :label="item"
+                  :value="item"
+                  v-for="(item, index) in areaList"
+                  :key="index"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </div>
         </el-form-item>
         <el-form-item label="方向（企业标签）" prop="tags">
           <el-input v-model="formBase.tags"></el-input>
@@ -58,7 +64,7 @@
   </div>
 </template>
 <script>
-import { add, detail } from "@/api/hmmm/companys.js";
+import { add, detail, update } from "@/api/hmmm/companys.js";
 import { provinces, citys } from "@/api/hmmm/citys.js";
 export default {
   name: "CompanysAdd",
@@ -69,6 +75,13 @@ export default {
     },
   },
   data() {
+    var validatorCity = (rule, value, callback) => {
+      if (!this.formBase.province) {
+        callback(new Error(" "));
+      } else {
+        callback();
+      }
+    };
     return {
       formBase: {
         isFamous: true, //是否为名企
@@ -89,14 +102,17 @@ export default {
         province: [
           { required: true, message: "请选择省份", trigger: "change" },
         ],
+        city: [{ validator: validatorCity, trigger: "change" }],
         tags: [{ required: true, message: "请输入标签", trigger: "blur" }],
         remarks: [{ required: true, message: "请输入", trigger: "blur" }],
       },
       params: this.$parent.$parent.params,
+      flag: 0, //0表示添加，1表示修改
     };
   },
   computed: {
     dialogTitle() {
+      this.flag = this.formBase.shortName ? 1 : 0;
       return this.formBase.shortName ? "编辑用户" : "添加用户";
     },
   },
@@ -124,22 +140,21 @@ export default {
     async onSave() {
       await this.$refs.dataForm.validate();
       try {
-        await add(this.formBase);
+        if (this.flag) {
+          await update(this.formBase);
+        } else {
+          await add(this.formBase);
+        }
         this.onClose();
         this.$emit("render", this.params);
       } catch (err) {
-        this.$message.error("添加失败");
+        this.$message.error("操作失败");
       }
     },
     async editDate(id) {
       const res = await detail({ id });
-      // console.log(res);
-      this.formBase.shortName = res.data.shortName;
-      this.formBase.company = res.data.company;
-      this.formBase.province = res.data.province;
-      this.formBase.city = res.data.city;
-      this.formBase.tags = res.data.tags;
-      this.formBase.remarks = res.data.remarks;
+      this.formBase = res.data;
+      this.formBase.isFamous = this.formBase.isFamous ? true : false;
     },
   },
 };

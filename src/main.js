@@ -30,6 +30,14 @@ Vue.use(hmmm, store)
 /*
  * 注册 - 组件
  */
+// 富文本
+import QuillEditor from 'vue-quill-editor'
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+Vue.use(QuillEditor)
+
 
 // 饿了么
 Vue.use(Element, {
