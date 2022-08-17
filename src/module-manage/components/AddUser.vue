@@ -1,6 +1,11 @@
 <template>
   <div class="add-form">
-    <el-dialog @close="onClose" title="创建用户" :visible="visible" width="30%">
+    <el-dialog
+      @close="onClose"
+      :title="addForm.id ? '编辑用户' : '创建用户'"
+      :visible="visible"
+      width="30%"
+    >
       <!-- from表单 -->
 
       <el-form
@@ -148,7 +153,7 @@ export default {
   methods: {
     // 权限组
     async simple() {
-      console.log(this.userItem.id);
+      // console.log(this.userItem.id);
       if (this.userItem.id) {
         // this.addForm = { ...this.userItem };
         // 利用for in把父组件得值 赋值给子组件
@@ -183,7 +188,7 @@ export default {
     // 提交表单
     async onSubmit() {
       // 提交前校验
-      this.$refs.from.validate();
+      await this.$refs.from.validate();
       // 修改
       if (this.addForm.id) {
         await update(this.addForm);

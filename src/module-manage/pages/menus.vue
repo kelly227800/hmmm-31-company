@@ -3,46 +3,128 @@
     <el-card class="box-card">
       <!-- 新建 -->
       <div class="addUser">
-        <el-button size="mini" icon="el-icon-edit" type="success">
-          新增用户
+        <el-button
+          size="mini"
+          icon="el-icon-edit"
+          type="success"
+          @click="visibleMenu = true"
+        >
+          添加菜单
         </el-button>
       </div>
       <!-- 表格 -->
-      <el-table :data="tableData" style="width: 100%">
+      <el-table
+        :data="tableData"
+        style="width: 100%; margin-bottom: 20px"
+        row-key="id"
+        default-expand-all
+        :tree-props="{ children: 'childs', hasChildren: 'hasChildren' }"
+      >
         <el-table-column label="标题" width="180">
-          <template slot-scope="scope">
-            <i class="el-icon-time"></i>
-            <span style="margin-left: 10px">{{ scope.row.date }}</span>
+          <template slot-scope="{ row }">
+            <i class="el-icon-folder-opened icon" v-if="row.childs" />
+            <i
+              class="el-icon-document-remove icon"
+              v-if="!row.childs && !row.is_point"
+            />
+            <i class="el-icon-view icon" v-if="row.is_point" />
+            {{ row.title }}
           </template>
+          <!-- <template slot-scope="{ row }">
+            <i class="el-icon-folder-opened"></i>
+            <span style="margin-left: 10px">{{ row.title }}</span>
+          </template> -->
         </el-table-column>
-        <el-table-column label="权限点代码" width="1300"> </el-table-column>
+        <el-table-column label="权限点代码" prop="code" width="900">
+        </el-table-column>
         <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button size="mini" @click="handleEdit(scope.$index, scope.row)"
-              >编辑</el-button
-            >
+          <template slot-scope="{ row }">
             <el-button
-              size="mini"
+              @click="editUser(row)"
+              style="
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                padding: 10px;
+              "
+              type="primary"
+              icon="el-icon-edit"
+              plain
+            />
+            <el-button
+              v-if="row.id !== 2"
+              @click="delUser(row)"
+              style="
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                padding: 10px;
+              "
+              icon="el-icon-delete"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
-              >删除</el-button
-            >
+              plain
+            />
           </template>
         </el-table-column>
       </el-table>
     </el-card>
+
+    <!-- 新增菜单弹框 -->
+    <AddMenu
+      v-if="visibleMenu"
+      :visibleMenu.sync="visibleMenu"
+      :tableData="tableData"
+      @addSuccess="getMenusList"
+    ></AddMenu>
   </div>
 </template>
 
 <script>
+import AddMenu from "../components/AddMenu.vue";
+import { list, remove } from "@/api/base/menus.js";
 export default {
   data() {
-    return {};
+    return {
+      tableData: [],
+      visibleMenu: false,
+      treeProps: {
+        children: "childs", //绑定childs为孩子
+      },
+    };
+  },
+  components: {
+    AddMenu,
+  },
+  created() {
+    this.getMenusList();
   },
 
-  created() {},
-
-  methods: {},
+  methods: {
+    // 获取菜单列表
+    async getMenusList() {
+      const { data } = await list();
+      const res = JSON.stringify(data);
+      // console.log(res);
+      const reg1 = /points/gi; // 定义正则
+      const tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
+      this.tableData = [{ id: 0, title: "主导航" }, ...tableData];
+      // console.log(this.tableData);
+    },
+    editUser(row) {
+      console.log("编辑");
+      console.log(row);
+    },
+    async delUser(row) {
+      try {
+        // console.log(row.id);
+        await remove(row);
+        this.$message.success("删除成功");
+        this.getMenusList();
+      } catch (error) {
+        this.$message.error("删除失败，请重试");
+      }
+    },
+  },
 };
 </script>
 
@@ -51,6 +133,12 @@ export default {
   .addUser {
     display: flex;
     justify-content: end;
+  }
+  .icon {
+    margin-right: 10px;
+  }
+  :deep(.el-table__expand-icon) {
+    display: none;
   }
 }
 </style>
