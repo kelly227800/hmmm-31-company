@@ -26,11 +26,11 @@
       ></el-table-column>
       <el-table-column prop="questionType" label="题型" align="center">
       </el-table-column>
-      <el-table-column
-        prop="question"
-        label="题干"
-        align="center"
-      ></el-table-column>
+      <el-table-column label="题干" align="center">
+        <template slot-scope="{ row }">
+          <div v-html="row.question"></div>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="addDate"
         label="录入时间"
@@ -77,11 +77,26 @@
       <el-table-column prop="address" label="操作" width="200" align="center">
         <template slot-scope="{ row }">
           <div class="btn">
-            <span @click="Previewfn">预览</span>
-            <span>审核</span>
-            <span @click="upgo(row.id)">修改</span>
-            <span>上架</span>
-            <span @click="del(row.id)">删除</span>
+            <span @click="Previewfn(row.id)">预览</span>
+            <span
+              :class="{ updown: row.chkState !== 0 }"
+              @click="Audit(row.id, row.chkState)"
+              >审核</span
+            >
+            <span
+              :class="{ updown: row.publishState === 1 }"
+              @click="upgo(row.id, row.publishState)"
+              >修改</span
+            >
+            <span v-if="row.publishState === 0" @click="Shelves(row.id)"
+              >上架</span
+            >
+            <span v-else @click="Takeitdown(row.id)">下架</span>
+            <span
+              :class="{ updown: row.publishState === 1 }"
+              @click="del(row.id, row.publishState)"
+              >删除</span
+            >
           </div>
         </template>
       </el-table-column>
@@ -97,31 +112,27 @@
         @current-change="handleCurrentChange"
       />
     </el-row>
-    <video
-      v-if="isshow"
-      controls
-      autoplay
-      src="http://v-cdn.zjol.com.cn/277004.mp4"
-    ></video>
-    <el-dialog
-      @close="onclose"
-      title="提示"
-      :visible.sync="dialogVisible"
-      width="30%"
-    >
-      <span>此操作将永久删除该题目, 是否继续?</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="onclose">取 消</el-button>
-        <el-button type="primary" @click="onyes">确 定</el-button>
-      </span>
-    </el-dialog>
+
+    <QuestionsCheck
+      v-if="centerDialogVisible"
+      :centerDialogVisible.sync="centerDialogVisible"
+      :Auditid="Auditid"
+      @updata="getchoice"
+    />
+    <QuestionsPreview
+      v-if="showQuestionsPreview"
+      :showQuestionsPreview="showQuestionsPreview"
+      :questionDetail="questionDetail"
+      @close="showQuestionsPreview = false"
+    />
   </div>
 </template>
 
 <script>
 import { status } from "@/api/hmmm/constants";
-import { choice, remove } from "@/api/hmmm/questions";
-
+import { choice, remove, choicePublish, detail } from "@/api/hmmm/questions";
+import QuestionsCheck from "../../../components/questions-check.vue";
+import QuestionsPreview from "../../../components/questions-preview.vue";
 export default {
   data() {
     return {
@@ -133,9 +144,15 @@ export default {
       total: 0,
       isshow: false,
       tableloading: false,
-      dialogVisible: false,
-      delid: "",
+      centerDialogVisible: false,
+      showQuestionsPreview: false,
+      questionDetail: {},
+      Auditid: "",
     };
+  },
+  components: {
+    QuestionsCheck,
+    QuestionsPreview,
   },
 
   props: {
@@ -188,27 +205,97 @@ export default {
       this.params.page = val;
       this.getchoice();
     },
-    Previewfn() {
-      this.isshow = !this.isshow;
+    async Previewfn(id) {
+      this.showQuestionsPreview = true;
+      const { data } = await detail({ id });
+      this.questionDetail = data;
+      if (!this.questionDetail.videoURL.endsWith(".mp4")) {
+        this.questionDetail.videoURL = "../../../../assets/默认地址.mp4";
+      }
     },
-    upgo(id) {
-      this.$router.push({
-        name: "questions-new",
-        query: { id },
-      });
+    upgo(id, publishState) {
+      if (publishState === 0) {
+        this.$router.push({
+          name: "questions-new",
+          query: { id },
+        });
+      }
     },
-    del(id) {
-      this.delid = id;
-      this.dialogVisible = true;
+    del(id, publishState) {
+      if (publishState === 0) {
+        this.$confirm("此操作将永久删除该题目, 是否继续?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+        })
+          .then(async () => {
+            console.log(id);
+            await remove({ id });
+            this.$message({
+              type: "success",
+              message: "删除成功!",
+            });
+            this.getchoice();
+          })
+          .catch(() => {
+            // this.$message({
+            //   type: "info",
+            //   message: "已取消删除",
+            // });
+          });
+      }
     },
-    onclose() {
-      this.dialogVisible = false;
+    async Shelves(id) {
+      this.$confirm("您确认上架这道题目吗?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          console.log(id);
+          await choicePublish({ id, publishState: 1 });
+
+          this.$message({
+            type: "success",
+            message: "上架成功!",
+          });
+          this.getchoice();
+        })
+        .catch(() => {
+          // this.$message({
+          //   type: "info",
+          //   message: "已取消删除",
+          // });
+        });
     },
-    async onyes() {
-      await remove({ id: this.delid });
-      this.$message.success("删除成功");
-      this.getchoice()
-      this.onclose();
+    async Takeitdown(id) {
+      this.$confirm("您确认上架这道题目吗?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          console.log(id);
+          await choicePublish({ id, publishState: 0 });
+
+          this.$message({
+            type: "success",
+            message: "下架成功!",
+          });
+          this.getchoice();
+        })
+        .catch(() => {
+          // this.$message({
+          //   type: "info",
+          //   message: "已取消删除",
+          // });
+        });
+    },
+    Audit(id, chkState) {
+      if (chkState === 0) {
+        this.centerDialogVisible = true;
+        this.Auditid = id;
+      }
     },
   },
 };
@@ -226,5 +313,9 @@ export default {
   display: flex;
   justify-content: space-between;
   cursor: pointer;
+}
+.updown {
+  color: #c0c4cc;
+  cursor: not-allowed;
 }
 </style>

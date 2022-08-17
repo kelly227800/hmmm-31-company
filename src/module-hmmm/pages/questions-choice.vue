@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <el-card class="box-card">
-      <QuestionNavbar />
+      <QuestionNavbar @search="seatchfn" />
       <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
         <el-tab-pane label="全部" name="all"></el-tab-pane>
         <el-tab-pane label="待审核" name="0"></el-tab-pane>
@@ -28,9 +28,14 @@ export default {
     MainTable,
   },
   methods: {
-    async handleClick() {
-      Cookies.set("hmmm-activeName", this.activeName);
-      await this.$refs.main.getchoice();
+    handleClick() {
+      setTimeout(async () => {
+        Cookies.set("hmmm-activeName", this.activeName);
+        await this.$refs.main.getchoice();
+      });
+    },
+    seatchfn(list) {
+      this.$refs.main.tableData = list;
     },
   },
 };

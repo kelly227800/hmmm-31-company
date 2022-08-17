@@ -26,11 +26,11 @@
       ></el-table-column>
       <el-table-column prop="questionType" label="题型" align="center">
       </el-table-column>
-      <el-table-column
-        prop="question"
-        label="题干"
-        align="center"
-      ></el-table-column>
+      <el-table-column label="题干" align="center">
+        <template slot-scope="{ row }">
+          <div v-html="row.question"></div>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="addDate"
         label="录入时间"
@@ -49,30 +49,6 @@
         align="center"
         :formatter="formatterState"
       ></el-table-column>
-      <el-table-column
-        prop="chkState"
-        label="审核状态"
-        align="center"
-        :formatter="formatterState"
-      ></el-table-column>
-      <el-table-column
-        prop="creator"
-        label="审核意见"
-        align="center"
-        :formatter="formatterState"
-      ></el-table-column>
-      <el-table-column
-        prop="creator"
-        label="审核人"
-        align="center"
-        :formatter="formatterState"
-      ></el-table-column>
-      <el-table-column
-        prop="publishState"
-        label="发布状态"
-        align="center"
-        :formatter="formatterState"
-      ></el-table-column>
       <!-- slot-scope="scope" -->
       <el-table-column prop="address" label="操作" width="200" align="center">
         <template slot-scope="{ row }">
@@ -81,7 +57,7 @@
             icon="el-icon-view"
             circle
             plain
-            @click="Previewfn"
+            @click="Previewfn(row.id)"
           ></el-button>
           <el-button
             type="success"
@@ -102,6 +78,7 @@
             icon="el-icon-check"
             circle
             plain
+            @click="add(row.id)"
           ></el-button>
         </template>
       </el-table-column>
@@ -117,38 +94,19 @@
         @current-change="handleCurrentChange"
       />
     </el-row>
-    <video
-      v-if="isshow"
-      controls
-      autoplay
-      src="http://v-cdn.zjol.com.cn/277004.mp4"
-    ></video>
-    <el-dialog
-      @close="onclose"
-      title="提示"
-      :visible.sync="dialogVisible"
-      width="30%"
-    >
-      <el-alert
-        title="此操作将永久删除该题目, 是否继续?"
-        type="warning"
-        show-icon
-        :closable="false"
-        style="background-color: #fff"
-      >
-      </el-alert>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="onclose">取 消</el-button>
-        <el-button type="primary" @click="onyes">确 定</el-button>
-      </span>
-    </el-dialog>
+    <QuestionsPreview
+      v-if="showQuestionsPreview"
+      :showQuestionsPreview="showQuestionsPreview"
+      :questionDetail="questionDetail"
+      @close="showQuestionsPreview = false"
+    />
   </div>
 </template>
 
 <script>
 import { status } from "@/api/hmmm/constants";
-import { choice, remove } from "@/api/hmmm/questions";
-
+import { list, remove, choiceAdd, detail } from "@/api/hmmm/questions";
+import QuestionsPreview from "../../../components/questions-preview.vue";
 export default {
   data() {
     return {
@@ -158,11 +116,13 @@ export default {
         pagesize: 5,
       },
       total: 0,
-      isshow: false,
       tableloading: false,
-      dialogVisible: false,
-      delid: "",
+      showQuestionsPreview: false,
+      questionDetail: {},
     };
+  },
+  components: {
+    QuestionsPreview,
   },
 
   props: {
@@ -184,7 +144,7 @@ export default {
           pagesize: 5,
         };
         this.tableloading = true;
-        const { data } = await choice(this.params);
+        const { data } = await list(this.params);
         this.total = data.counts;
         this.tableData = data.items;
         this.tableloading = false;
@@ -196,7 +156,7 @@ export default {
         };
         this.tableloading = true;
 
-        const { data } = await choice(this.params);
+        const { data } = await list(this.params);
         this.total = data.counts;
         this.tableData = data.items;
         this.tableloading = false;
@@ -211,12 +171,17 @@ export default {
       this.getchoice();
     }, // 切换到不同页数的时候触发
     handleCurrentChange(val) {
-      console.log(val);
       this.params.page = val;
       this.getchoice();
     },
-    Previewfn() {
-      this.isshow = !this.isshow;
+    async Previewfn(id) {
+      this.showQuestionsPreview = true;
+      const { data } = await detail({ id });
+      this.questionDetail = data;
+      console.log(this.questionDetail.videoURL);
+      if (!this.questionDetail.videoURL?.endsWith(".mp4")) {
+        this.questionDetail.videoURL = "../../../../assets/默认地址.mp4";
+      }
     },
     upgo(id) {
       this.$router.push({
@@ -225,17 +190,47 @@ export default {
       });
     },
     del(id) {
-      this.delid = id;
-      this.dialogVisible = true;
+      this.$confirm("此操作将永久删除该题目, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          console.log(id);
+          await remove({ id });
+          this.$message({
+            type: "success",
+            message: "删除成功!",
+          });
+        })
+        .catch(() => {
+          // this.$message({
+          //   type: "info",
+          //   message: "已取消删除",
+          // });
+        });
     },
-    onclose() {
-      this.dialogVisible = false;
-    },
-    async onyes() {
-      await remove({ id: this.delid });
-      this.$message.success("删除成功");
-      this.getchoice();
-      this.onclose();
+
+    add(id) {
+      this.$confirm("此操作将该题目加入精选, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(async () => {
+          await choiceAdd({ id, choiceState: 1 });
+          this.$message({
+            type: "success",
+            message: "加入精选成功",
+          });
+          this.getchoice();
+        })
+        .catch(() => {
+          // this.$message({
+          //   type: "info",
+          //   message: "已取消删除",
+          // });
+        });
     },
   },
 };
@@ -247,15 +242,5 @@ export default {
 } */
 ::v-deep .el-table th.is-leaf {
   border-bottom: 2px solid #e8e8e8 !important;
-}
-::v-deep .el-dialog__header {
-  z-index: 999;
-  background-color: #fff;
-  .el-dialog__title {
-    color: #000;
-  }
-}
-.el-alert__content {
-  color: #000;
 }
 </style>

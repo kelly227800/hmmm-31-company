@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <el-card class="box-card">
-      <QuestionNavbar />
-      <SelectedMainTable />
+      <QuestionNavbar @search="seatchfn" />
+      <SelectedMainTable ref="main" />
     </el-card>
   </div>
 </template>
@@ -12,14 +12,20 @@ import QuestionNavbar from "./questions/components/QuestionNavbar.vue";
 import SelectedMainTable from "@/module-hmmm/pages/questions/components/SelectedMainTable.vue";
 export default {
   data() {
-    return {};
+    return {
+      tablelist: [],
+    };
   },
   components: {
     QuestionNavbar,
     SelectedMainTable,
   },
   created() {},
-  methods: {},
+  methods: {
+    seatchfn(list) {
+      this.$refs.main.tableData = list;
+    },
+  },
 };
 </script>
 

@@ -257,8 +257,10 @@ export default {
       for (let key in this.formData) {
         if (this.formData[key]) data[key] = this.formData[key];
       }
-      const res = await choice(data);
-      console.log(res);
+      const {
+        data: { items },
+      } = await choice(data);
+      this.$emit("search", items);
     },
   },
 };
