@@ -186,7 +186,7 @@ export default {
       this.questionDetail = data;
       console.log(this.questionDetail.videoURL);
       if (!this.questionDetail.videoURL?.endsWith(".mp4")) {
-        this.questionDetail.videoURL = "../../../../assets/默认地址.mp4";
+        this.questionDetail.videoURL = "https://v-cdn.zjol.com.cn/277004.mp4";
       }
     },
     upgo(id) {
