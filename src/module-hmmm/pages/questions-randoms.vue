@@ -109,10 +109,10 @@
         </div>
         <span slot="footer">
           <el-button size="small" @click="delRandomsDialog = false"
-            >取 消</el-button
+            >取消</el-button
           >
           <el-button size="small" type="primary" @click="confirmDel"
-            >确 定</el-button
+            >确定</el-button
           >
         </span>
       </el-dialog>

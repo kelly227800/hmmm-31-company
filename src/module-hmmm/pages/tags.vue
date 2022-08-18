@@ -7,25 +7,18 @@
           <!-- 目录 -->
           <el-col :span="18">
             <el-form-item label="标签名称" class="nameInput">
-              <el-input size="small" v-model="tags.name"></el-input>
+              <el-input size="small" v-model="tagsForm.name"></el-input>
             </el-form-item>
             <!-- 状态 -->
             <el-form-item label="状态">
-              <el-select v-model="tags.status" placeholder="请选择">
-                <!-- <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              >
-              </el-option> -->
+              <el-select v-model="tagsForm.status" placeholder="请选择">
+                <el-option label="启用" value="1"> </el-option>
+                <el-option label="禁用" value="0"> </el-option>
               </el-select>
             </el-form-item>
             <!-- 按钮 -->
             <el-form-item>
-              <el-button size="small" @click="tagsForm.value = ''"
-                >清除</el-button
-              >
+              <el-button size="small" @click="clearForm">清除</el-button>
               <el-button type="primary" size="small" @click="onSearch"
                 >搜索</el-button
               ></el-form-item
@@ -33,13 +26,15 @@
           </el-col>
           <!-- 新增 -->
           <el-col :span="6" style="text-align: right">
-            <el-button type="success" size="small">新增标签</el-button>
+            <el-button type="success" size="small" @click="showTagDialog = true"
+              ><i class="el-icon-edit"></i>新增标签</el-button
+            >
           </el-col>
         </el-row>
       </el-form>
       <!-- 消息提示 -->
       <el-alert
-        :title="'数据一共' + total + '条'"
+        :title="'数据一共' + counts + '条'"
         type="info"
         show-icon
         :closable="false"
@@ -51,29 +46,114 @@
         style="width: 97%; margin: 0 auto"
         :header-cell-style="headerRow"
       >
-        <el-table-column label="序号"> </el-table-column>
-        <el-table-column label="所属学科"> </el-table-column>
-        <el-table-column label="目录名称"> </el-table-column>
-        <el-table-column label="创建者"> </el-table-column>
-        <el-table-column label="创建日期"> </el-table-column>
-        <el-table-column label="面试题数量"> </el-table-column>
-        <el-table-column label="状态"> </el-table-column>
-        <el-table-column label="操作"> </el-table-column>
+        <el-table-column label="序号" type="index" width="80px">
+        </el-table-column>
+        <el-table-column label="所属学科" prop="subjectName"> </el-table-column>
+        <el-table-column label="标签名称" prop="tagName"> </el-table-column>
+        <el-table-column label="创建者" prop="username"> </el-table-column>
+        <el-table-column label="创建日期" prop="addDate">
+          <template slot-scope="{ row }">
+            {{ row.addDate | parseTimeByString }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="状态"
+          prop="state"
+          :formatter="statusFormatter"
+        ></el-table-column>
+        <el-table-column label="操作" width="150px">
+          <template slot-scope="{ row }">
+            <el-link
+              type="primary"
+              :underline="false"
+              @click="changeStateFn(row)"
+              >{{ row.state == 1 ? "禁用" : "启用" }}</el-link
+            >
+            <el-link
+              :type="row.state == 0 ? 'primary' : 'info'"
+              :underline="false"
+              :disabled="row.state == 1"
+              @click="editTag(row)"
+              >修改</el-link
+            >
+            <el-link
+              :type="row.state == 0 ? 'primary' : 'info'"
+              :underline="false"
+              :disabled="row.state == 1"
+              @click="clickDel(row)"
+              >删除</el-link
+            >
+          </template>
+        </el-table-column>
       </el-table>
+      <!-- 分页 -->
+      <el-row type="flex">
+        <el-col>
+          <el-row type="flex" justify="end">
+            <el-pagination
+              background
+              layout="prev, pager, next, sizes,jumper"
+              :total="Number(counts)"
+              :current-page="page"
+              :page-size="pagesize"
+              :page-sizes="[5, 10, 20, 50]"
+              @current-change="handleCurrentChange"
+              @size-change="handleSizeChange"
+            >
+            </el-pagination></el-row
+        ></el-col>
+      </el-row>
+      <!-- 新增/修改对话框 -->
+      <TagsAdd
+        ref="tagsAdd"
+        :id="Number(id)"
+        :isEdit="isEdit"
+        :showTagDialog="showTagDialog"
+        @close="closeDialog"
+        @update="getTagsList"
+      />
+      <!-- 删除对话框 -->
+      <el-dialog
+        class="delDialog"
+        title="提示"
+        :visible.sync="delTagDialog"
+        width="420px"
+        style="margin-top: 27.5vh; font-size: 18px"
+      >
+        <div class="text">
+          <span class="el-icon-warning"></span>
+          <span>此操作将永久删除该标签，是否继续？</span>
+        </div>
+        <span slot="footer">
+          <el-button size="small" @click="delTagDialog = false">取消</el-button>
+          <el-button size="small" type="primary" @click="confirmDel"
+            >确定</el-button
+          >
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
 
 <script>
+import { list, changeState, remove } from "@/api/hmmm/tags";
+import { status } from "@/api/hmmm/constants";
+import TagsAdd from "../components/tags-add.vue";
 export default {
   data() {
     return {
-      total: 17,
-      tags: {
+      id: "",
+      counts: "",
+      tagsForm: {
         name: "",
         status: "",
       },
       tableData: [],
+      page: 1,
+      pagesize: 10,
+      isEdit: false,
+      showTagDialog: false,
+      delTagDialog: false,
     };
   },
   methods: {
@@ -81,7 +161,127 @@ export default {
     headerRow() {
       return "background:#fafafa";
     },
-    onSearch() {},
+    // 利用列格式化属性处理状态数据
+    statusFormatter(row, column, cellValue, index) {
+      let obj = status.find((item) => item.value == cellValue);
+      return "已" + obj.label;
+    },
+    // 页面尺寸变化
+    handleSizeChange(val) {
+      this.pagesize = val;
+      this.getTagsList();
+    },
+    // 页码变化
+    handleCurrentChange(val) {
+      this.page = val;
+      this.getTagsList();
+    },
+    // 搜索
+    onSearch() {
+      this.page = 1;
+      this.getTagsList();
+    },
+    // 清空表单
+    clearForm() {
+      this.tagsForm.name = "";
+      this.tagsForm.status = "";
+    },
+    // 关闭新增/修改对话框
+    closeDialog() {
+      const form = this.$refs.tagsAdd.tagForm;
+      form.name = "";
+      form.subject = "";
+      this.showTagDialog = false;
+      this.isEdit = false;
+    },
+    // 点击删除
+    clickDel(row) {
+      this.delTagDialog = true;
+      this.id = row.id;
+    },
+    // 删除标签
+    async confirmDel() {
+      try {
+        await remove({ id: Number(this.id) });
+        this.delTagDialog = false;
+        this.$message.success("操作成功");
+        this.getTagsList();
+      } catch (err) {
+        this.$message.error("操作失败");
+      }
+    },
+    // 改变标签状态
+    async changeStateFn(row) {
+      try {
+        await changeState({
+          id: row.id,
+          state: row.state == 1 ? 0 : 1,
+        });
+        this.getTagsList();
+        this.$message.success("操作成功");
+      } catch (err) {
+        this.$message.error("操作失败");
+      }
+    },
+    // 修改标签
+    editTag(row) {
+      this.id = row.id;
+      this.isEdit = true;
+      this.showTagDialog = true;
+      const form = this.$refs.tagsAdd.tagForm;
+      form.name = row.tagName;
+      form.subject = row.subjectID;
+    },
+    // 获取标签列表
+    async getTagsList() {
+      let query = {};
+      // 搜索框无关键字
+      if (this.tagsForm.name === "" && this.tagsForm.status === "") {
+        query = { page: this.page, pagesize: this.pagesize };
+      } else if (
+        // 搜索框有标签名称无状态选择
+        this.tagsForm.name !== "" &&
+        this.tagsForm.status === ""
+      ) {
+        query = {
+          page: this.page,
+          pagesize: this.pagesize,
+          tagName: this.tagsForm.name,
+        };
+      } else if (
+        // 搜索框无标签名称有状态选择
+        this.tagsForm.status !== "" &&
+        this.tagsForm.name === ""
+      ) {
+        query = {
+          page: this.page,
+          pagesize: this.pagesize,
+          state: this.tagsForm.status,
+        };
+      } else {
+        // 搜索框有标签名称有状态选择
+        query = {
+          page: this.page,
+          pagesize: this.pagesize,
+          state: this.tagsForm.status,
+          tagName: this.tagsForm.name,
+        };
+      }
+      const {
+        data,
+        data: { items, counts },
+      } = await list(query);
+      this.tableData = items;
+      this.counts = counts;
+      console.log(data);
+    },
+  },
+  created() {
+    // 获取初始数据
+    this.getTagsList();
+  },
+  components: {
+    TagsAdd,
   },
 };
 </script>
@@ -101,5 +301,45 @@ export default {
 }
 .nameInput {
   padding-left: 10px;
+}
+.el-link {
+  margin-right: 10px;
+}
+.el-icon-edit {
+  margin-right: 5px;
+}
+.el-pagination {
+  margin: 20px;
+}
+::v-deep .delDialog {
+  border-radius: 4px;
+  .el-dialog__header {
+    padding: 15px 15px 10px;
+    background: unset;
+    line-height: 1;
+    border-radius: 4px;
+    .el-dialog__title {
+      color: #303133;
+    }
+    .el-dialog__close {
+      color: #fff;
+      color: #303133;
+    }
+  }
+  .el-icon-warning {
+    margin-right: 10px;
+    font-size: 22px;
+    color: #e6a23c;
+  }
+  .el-dialog__body {
+    padding: 5px 20px;
+  }
+  .el-dialog__footer {
+    padding: 10px 20px 10px;
+  }
+}
+.text {
+  display: flex;
+  align-items: center;
 }
 </style>
