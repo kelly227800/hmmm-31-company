@@ -1,6 +1,16 @@
 <template>
   <div class="container" style="padding: 10px; background-color: #f0f2f5">
     <div class="content">
+      <!-- 面包屑 -->
+      <el-breadcrumb
+        v-if="isTo"
+        separator-class="el-icon-arrow-right"
+        style="padding: 18px 20px; border-bottom: 1px solid #ebeef5"
+      >
+        <el-breadcrumb-item>学科管理</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ $route.query.name }}</el-breadcrumb-item>
+        <el-breadcrumb-item>目录管理</el-breadcrumb-item>
+      </el-breadcrumb>
       <!-- 搜索框 -->
       <el-form :inline="true" :model="directorysForm">
         <el-row type="flex" flex="start">
@@ -26,6 +36,12 @@
           </el-col>
           <!-- 新增 -->
           <el-col :span="6" style="text-align: right">
+            <el-link
+              v-if="isTo"
+              type="primary"
+              @click="$router.push({ name: 'subjects-list' })"
+              ><span class="el-icon-back"></span> 返回学科</el-link
+            >
             <el-button
               type="success"
               size="small"
@@ -48,7 +64,6 @@
         :data="tableData"
         style="width: 97%; margin: 0 auto"
         :header-cell-style="headerRow"
-        @cell-click="clickCell"
       >
         <el-table-column label="序号" type="index" width="80px">
         </el-table-column>
@@ -113,6 +128,7 @@
       <DirectorysAdd
         ref="directorysAdd"
         :id="Number(id)"
+        :subjectID="Number(subjectID)"
         :isEdit="isEdit"
         :showDirectoryDialog="showDirectoryDialog"
         @close="closeDialog"
@@ -160,15 +176,13 @@ export default {
       page: 1,
       pagesize: 10,
       subjectID: "",
+      isTo: false,
       isEdit: false,
       showDirectoryDialog: false,
       delDirectoryDialog: false,
     };
   },
   methods: {
-    clickCell(row, column, cell, event) {
-      // console.log(row);
-    },
     // 处理表头样式
     headerRow() {
       return "background:#fafafa";
@@ -234,40 +248,87 @@ export default {
     // 获取目录列表
     async getDirectoryList() {
       let query = {};
-      // 搜索框无关键字
-      if (
-        this.directorysForm.name === "" &&
-        this.directorysForm.status === ""
-      ) {
-        query = { page: this.page, pagesize: this.pagesize };
-      } else if (
-        // 搜索框有目录名称无状态选择
-        this.directorysForm.name !== "" &&
-        this.directorysForm.status === ""
-      ) {
-        query = {
-          page: this.page,
-          pagesize: this.pagesize,
-          directoryName: this.directorysForm.name,
-        };
-      } else if (
-        // 搜索框无目录名称有状态选择
-        this.directorysForm.status !== "" &&
-        this.directorysForm.name === ""
-      ) {
-        query = {
-          page: this.page,
-          pagesize: this.pagesize,
-          state: this.directorysForm.status,
-        };
+      // 非学科跳转过来
+      if (!this.isTo) {
+        // 搜索框无关键字
+        if (
+          this.directorysForm.name === "" &&
+          this.directorysForm.status === ""
+        ) {
+          query = { page: this.page, pagesize: this.pagesize };
+        } else if (
+          // 搜索框有目录名称无状态选择
+          this.directorysForm.name !== "" &&
+          this.directorysForm.status === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            directoryName: this.directorysForm.name,
+          };
+        } else if (
+          // 搜索框无目录名称有状态选择
+          this.directorysForm.status !== "" &&
+          this.directorysForm.name === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            state: this.directorysForm.status,
+          };
+        } else {
+          // 搜索框有目录名称有状态选择
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            state: this.directorysForm.status,
+            directoryName: this.directorysForm.name,
+          };
+        }
       } else {
-        // 搜索框有目录名称有状态选择
-        query = {
-          page: this.page,
-          pagesize: this.pagesize,
-          state: this.directorysForm.status,
-          directoryName: this.directorysForm.name,
-        };
+        // 学科跳转过来
+        // 搜索框无关键字
+        if (
+          this.directorysForm.name === "" &&
+          this.directorysForm.status === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+          };
+        } else if (
+          // 搜索框有目录名称无状态选择
+          this.directorysForm.name !== "" &&
+          this.directorysForm.status === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+            directoryName: this.directorysForm.name,
+          };
+        } else if (
+          // 搜索框无目录名称有状态选择
+          this.directorysForm.status !== "" &&
+          this.directorysForm.name === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+            state: this.directorysForm.status,
+          };
+        } else {
+          // 搜索框有目录名称有状态选择
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+            state: this.directorysForm.status,
+            directoryName: this.directorysForm.name,
+          };
+        }
       }
       const {
         data,
@@ -275,7 +336,7 @@ export default {
       } = await list(query);
       this.tableData = items;
       this.counts = counts;
-      console.log(data);
+      // console.log(data);
     },
     // 搜索
     onSearch() {
@@ -292,8 +353,18 @@ export default {
     },
   },
   created() {
+    this.isTo = false;
+    // 判断是否从学科跳转过来
+    if (this.$route.query.id) {
+      this.isTo = true;
+      this.subjectID = this.$route.query.id;
+    }
     // 获取初始数据
     this.getDirectoryList();
+    // console.log(this.isTo);
+    this.$notify({
+      title: "金倩倩",
+    });
   },
   components: {
     DirectorysAdd,

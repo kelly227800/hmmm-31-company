@@ -14,7 +14,7 @@
         label-width="80px"
         :rules="rules"
       >
-        <el-form-item label="所属学科" prop="subject">
+        <el-form-item label="所属学科" prop="subject" v-if="subjectID === 0">
           <el-select v-model="tagForm.subject" placeholder="请选择">
             <el-option
               v-for="item in options"
@@ -69,6 +69,9 @@ export default {
     isEdit: {
       type: Boolean,
     },
+    subjectID: {
+      type: Number,
+    },
     id: {
       type: Number,
     },
@@ -86,14 +89,16 @@ export default {
         // 新增对话框
         if (!this.isEdit) {
           await add({
-            subjectID: this.tagForm.subject,
+            subjectID:
+              this.subjectID === 0 ? this.tagForm.subject : this.subjectID,
             tagName: this.tagForm.name,
           });
         } else {
           // 修改对话框
           await update({
             id: this.id,
-            subjectID: this.tagForm.subject,
+            subjectID:
+              this.subjectID === 0 ? this.tagForm.subject : this.subjectID,
             tagName: this.tagForm.name,
           });
         }

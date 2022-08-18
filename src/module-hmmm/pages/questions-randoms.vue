@@ -186,7 +186,7 @@ export default {
           data,
           data: { items, counts },
         } = await randoms(query);
-        console.log(data);
+        // console.log(data);
         this.randomsData = data;
         this.randomsList = items;
         this.total = counts;
@@ -231,6 +231,9 @@ export default {
   created() {
     // 获取初始数据
     this.getData();
+    this.$notify({
+      title: "金倩倩",
+    });
   },
 };
 </script>

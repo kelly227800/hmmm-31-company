@@ -14,7 +14,7 @@
         label-width="80px"
         :rules="rules"
       >
-        <el-form-item label="所属学科" prop="subject">
+        <el-form-item label="所属学科" prop="subject" v-if="subjectID === 0">
           <el-select v-model="directoryForm.subject" placeholder="请选择">
             <el-option
               v-for="item in options"
@@ -69,6 +69,9 @@ export default {
     isEdit: {
       type: Boolean,
     },
+    subjectID: {
+      type: Number,
+    },
     id: {
       type: Number,
     },
@@ -86,14 +89,20 @@ export default {
         // 新增对话框
         if (!this.isEdit) {
           await add({
-            subjectID: this.directoryForm.subject,
+            subjectID:
+              this.subjectID === 0
+                ? this.directoryForm.subject
+                : this.subjectID,
             directoryName: this.directoryForm.name,
           });
         } else {
           // 修改对话框
           await update({
             id: this.id,
-            subjectID: this.directoryForm.subject,
+            subjectID:
+              this.subjectID === 0
+                ? this.directoryForm.subject
+                : this.subjectID,
             directoryName: this.directoryForm.name,
           });
         }
@@ -106,6 +115,7 @@ export default {
   },
   created() {
     this.getSimpleSubjects();
+    // console.log(this.subjectID);
   },
 };
 </script>

@@ -1,6 +1,16 @@
 <template>
   <div class="container" style="padding: 10px; background-color: #f0f2f5">
     <div class="content">
+      <!-- 面包屑 -->
+      <el-breadcrumb
+        v-if="isTo"
+        separator-class="el-icon-arrow-right"
+        style="padding: 18px 20px; border-bottom: 1px solid #ebeef5"
+      >
+        <el-breadcrumb-item>学科管理</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ $route.query.name }}</el-breadcrumb-item>
+        <el-breadcrumb-item>标签管理</el-breadcrumb-item>
+      </el-breadcrumb>
       <!-- 搜索框 -->
       <el-form :inline="true" :model="tagsForm">
         <el-row type="flex" flex="start">
@@ -26,6 +36,12 @@
           </el-col>
           <!-- 新增 -->
           <el-col :span="6" style="text-align: right">
+            <el-link
+              v-if="isTo"
+              type="primary"
+              @click="$router.push({ name: 'subjects-list' })"
+              ><span class="el-icon-back"></span> 返回学科</el-link
+            >
             <el-button type="success" size="small" @click="showTagDialog = true"
               ><i class="el-icon-edit"></i>新增标签</el-button
             >
@@ -107,6 +123,7 @@
       <TagsAdd
         ref="tagsAdd"
         :id="Number(id)"
+        :subjectID="Number(subjectID)"
         :isEdit="isEdit"
         :showTagDialog="showTagDialog"
         @close="closeDialog"
@@ -151,6 +168,8 @@ export default {
       tableData: [],
       page: 1,
       pagesize: 10,
+      subjectID: "",
+      isTo: false,
       isEdit: false,
       showTagDialog: false,
       delTagDialog: false,
@@ -235,37 +254,81 @@ export default {
     // 获取标签列表
     async getTagsList() {
       let query = {};
-      // 搜索框无关键字
-      if (this.tagsForm.name === "" && this.tagsForm.status === "") {
-        query = { page: this.page, pagesize: this.pagesize };
-      } else if (
-        // 搜索框有标签名称无状态选择
-        this.tagsForm.name !== "" &&
-        this.tagsForm.status === ""
-      ) {
-        query = {
-          page: this.page,
-          pagesize: this.pagesize,
-          tagName: this.tagsForm.name,
-        };
-      } else if (
-        // 搜索框无标签名称有状态选择
-        this.tagsForm.status !== "" &&
-        this.tagsForm.name === ""
-      ) {
-        query = {
-          page: this.page,
-          pagesize: this.pagesize,
-          state: this.tagsForm.status,
-        };
+      // 非学科跳转过来
+      if (!this.isTo) {
+        // 搜索框无关键字
+        if (this.tagsForm.name === "" && this.tagsForm.status === "") {
+          query = { page: this.page, pagesize: this.pagesize };
+        } else if (
+          // 搜索框有标签名称无状态选择
+          this.tagsForm.name !== "" &&
+          this.tagsForm.status === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            tagName: this.tagsForm.name,
+          };
+        } else if (
+          // 搜索框无标签名称有状态选择
+          this.tagsForm.status !== "" &&
+          this.tagsForm.name === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            state: this.tagsForm.status,
+          };
+        } else {
+          // 搜索框有标签名称有状态选择
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            state: this.tagsForm.status,
+            tagName: this.tagsForm.name,
+          };
+        }
       } else {
-        // 搜索框有标签名称有状态选择
-        query = {
-          page: this.page,
-          pagesize: this.pagesize,
-          state: this.tagsForm.status,
-          tagName: this.tagsForm.name,
-        };
+        // 学科跳转过来
+        // 搜索框无关键字
+        if (this.tagsForm.name === "" && this.tagsForm.status === "") {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+          };
+        } else if (
+          // 搜索框有标签名称无状态选择
+          this.tagsForm.name !== "" &&
+          this.tagsForm.status === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+            tagName: this.tagsForm.name,
+          };
+        } else if (
+          // 搜索框无标签名称有状态选择
+          this.tagsForm.status !== "" &&
+          this.tagsForm.name === ""
+        ) {
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+            state: this.tagsForm.status,
+          };
+        } else {
+          // 搜索框有标签名称有状态选择
+          query = {
+            page: this.page,
+            pagesize: this.pagesize,
+            subjectID: this.subjectID,
+            state: this.tagsForm.status,
+            tagName: this.tagsForm.name,
+          };
+        }
       }
       const {
         data,
@@ -273,12 +336,21 @@ export default {
       } = await list(query);
       this.tableData = items;
       this.counts = counts;
-      console.log(data);
+      // console.log(data);
     },
   },
   created() {
+    this.isTo = false;
+    // 判断是否从学科跳转过来
+    if (this.$route.query.id) {
+      this.isTo = true;
+      this.subjectID = this.$route.query.id;
+    }
     // 获取初始数据
     this.getTagsList();
+    this.$notify({
+      title: "金倩倩",
+    });
   },
   components: {
     TagsAdd,
