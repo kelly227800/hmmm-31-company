@@ -150,7 +150,7 @@ export default {
     radio: {
       get() {
         let obj = this.questionDetail.options.find((item) => item.isRight == 1);
-        return obj.title;
+        return obj ? obj.title : "未知";
       },
       set(val) {},
     },
@@ -162,7 +162,7 @@ export default {
             arr.push(item.title);
           }
         });
-        console.log(arr);
+        // console.log(arr);
         return arr;
       },
       set(val) {},
@@ -207,9 +207,11 @@ export default {
   position: relative;
   .el-icon-close {
     position: absolute;
-    cursor: pointer;
     left: 405px;
     top: 15px;
   }
+}
+img {
+  width: 100%;
 }
 </style>
