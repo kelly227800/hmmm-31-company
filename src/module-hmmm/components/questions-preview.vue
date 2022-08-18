@@ -79,7 +79,11 @@
         </div>
         <!-- 视频展示区 -->
         <div class="video">
-          <span class="el-icon-close" v-if="showVideo" @click="showVideo = false"></span>
+          <span
+            class="el-icon-close"
+            v-if="showVideo"
+            @click="showVideo = false"
+          ></span>
           <video
             style="width: 400px; height: 300px"
             v-if="showVideo"
@@ -146,7 +150,7 @@ export default {
     radio: {
       get() {
         let obj = this.questionDetail.options.find((item) => item.isRight == 1);
-        return obj.title;
+        return obj?.title;
       },
       set(val) {},
     },

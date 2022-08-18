@@ -29,9 +29,10 @@ export default {
   },
   methods: {
     handleClick() {
-      setTimeout(async () => {
+      setTimeout(() => {
         Cookies.set("hmmm-activeName", this.activeName);
-        await this.$refs.main.getchoice();
+        this.$refs.main.params.page = 1;
+        this.$refs.main.getchoice();
       });
     },
     seatchfn(list) {

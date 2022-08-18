@@ -13,6 +13,7 @@
         prop="number"
         label="试题编号"
         align="center"
+        width="220px"
       ></el-table-column>
       <el-table-column
         prop="subject"
@@ -24,30 +25,33 @@
         label="目录"
         align="center"
       ></el-table-column>
-      <el-table-column prop="questionType" label="题型" align="center">
+      <el-table-column
+        prop="questionType"
+        label="题型"
+        align="center"
+        :formatter="forquestionType"
+      >
       </el-table-column>
-      <el-table-column label="题干" align="center">
+      <el-table-column label="题干" align="center" width="180px">
         <template slot-scope="{ row }">
           <div v-html="row.question"></div>
         </template>
       </el-table-column>
-      <el-table-column
-        prop="addDate"
-        label="录入时间"
-        align="center"
-        :formatter="formatterState"
-      ></el-table-column>
+      <el-table-column label="录入时间" align="center" width="180px"
+        ><template slot-scope="{ row }">
+          {{ row.addDate | parseTimeByString }}
+        </template></el-table-column
+      >
       <el-table-column
         prop="difficulty"
         label="难度"
         align="center"
-        :formatter="formatterState"
+        :formatter="fordifficulty"
       ></el-table-column
       ><el-table-column
         prop="creator"
         label="录入人"
         align="center"
-        :formatter="formatterState"
       ></el-table-column>
       <!-- slot-scope="scope" -->
       <el-table-column prop="address" label="操作" width="200" align="center">
@@ -104,7 +108,12 @@
 </template>
 
 <script>
-import { status } from "@/api/hmmm/constants";
+import {
+  publishType,
+  difficulty,
+  questionType,
+  chkType,
+} from "@/api/hmmm/constants";
 import { list, remove, choiceAdd, detail } from "@/api/hmmm/questions";
 import QuestionsPreview from "../../../components/questions-preview.vue";
 export default {
@@ -162,10 +171,7 @@ export default {
         this.tableloading = false;
       }
     },
-    formatterState(row, column, cellValue, index) {
-      const findItem = status.find((item) => item.value == cellValue);
-      return findItem ? findItem.label : "未知";
-    },
+
     handleSizeChange(val) {
       this.params.pagesize = val;
       this.getchoice();
@@ -231,6 +237,14 @@ export default {
           //   message: "已取消删除",
           // });
         });
+    },
+    forquestionType(row, column, cellValue, index) {
+      const findItem = questionType.find((item) => item.value == cellValue);
+      return findItem ? findItem.label : "未知";
+    },
+    fordifficulty(row, column, cellValue, index) {
+      const findItem = difficulty.find((item) => item.value == cellValue);
+      return findItem ? findItem.label : "未知";
     },
   },
 };

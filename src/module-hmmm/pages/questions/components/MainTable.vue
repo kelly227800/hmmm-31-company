@@ -13,6 +13,7 @@
         prop="number"
         label="试题编号"
         align="center"
+        width="210px"
       ></el-table-column>
       <el-table-column
         prop="subject"
@@ -24,48 +25,52 @@
         label="目录"
         align="center"
       ></el-table-column>
-      <el-table-column prop="questionType" label="题型" align="center">
+      <el-table-column
+        prop="questionType"
+        label="题型"
+        align="center"
+        :formatter="forquestionType"
+      >
       </el-table-column>
-      <el-table-column label="题干" align="center">
+      <el-table-column label="题干" align="center" width="180px">
         <template slot-scope="{ row }">
           <div v-html="row.question"></div>
         </template>
       </el-table-column>
-      <el-table-column
-        prop="addDate"
-        label="录入时间"
-        align="center"
-        :formatter="formatterState"
-      ></el-table-column>
+      <el-table-column label="录入时间" align="center" width="180px">
+        <template slot-scope="{ row }">
+          {{ row.addDate | parseTimeByString }}
+        </template>
+      </el-table-column>
       <el-table-column
         prop="difficulty"
         label="难度"
         align="center"
-        :formatter="formatterState"
+        :formatter="fordifficulty"
       ></el-table-column
       ><el-table-column
         prop="creator"
         label="录入人"
         align="center"
-        :formatter="formatterState"
+        width="120px"
       ></el-table-column>
       <el-table-column
         prop="chkState"
         label="审核状态"
         align="center"
-        :formatter="formatterState"
+        :formatter="forchkType"
       ></el-table-column>
       <el-table-column
-        prop="creator"
+        prop="remarks"
         label="审核意见"
         align="center"
-        :formatter="formatterState"
+        width="180px"
       ></el-table-column>
       <el-table-column
         prop="creator"
         label="审核人"
         align="center"
-        :formatter="formatterState"
+        width="120px"
       ></el-table-column>
       <el-table-column
         prop="publishState"
@@ -129,7 +134,12 @@
 </template>
 
 <script>
-import { status } from "@/api/hmmm/constants";
+import {
+  publishType,
+  difficulty,
+  questionType,
+  chkType,
+} from "@/api/hmmm/constants";
 import { choice, remove, choicePublish, detail } from "@/api/hmmm/questions";
 import QuestionsCheck from "../../../components/questions-check.vue";
 import QuestionsPreview from "../../../components/questions-preview.vue";
@@ -170,8 +180,8 @@ export default {
     async getchoice() {
       if (this.chkState === "all") {
         this.params = {
-          page: 1,
-          pagesize: 5,
+          page: this.params.page,
+          pagesize: this.params.pagesize,
         };
         this.tableloading = true;
         const { data } = await choice(this.params);
@@ -180,8 +190,8 @@ export default {
         this.tableloading = false;
       } else {
         this.params = {
-          page: 1,
-          pagesize: 5,
+          page: this.params.page,
+          pagesize: this.params.pagesize,
           chkState: this.chkState,
         };
         this.tableloading = true;
@@ -193,8 +203,20 @@ export default {
       }
     },
     formatterState(row, column, cellValue, index) {
-      const findItem = status.find((item) => item.value == cellValue);
+      const findItem = publishType.find((item) => 3 - item.value == cellValue);
+      return findItem ? findItem.label : "待发布";
+    },
+    fordifficulty(row, column, cellValue, index) {
+      const findItem = difficulty.find((item) => item.value == cellValue);
       return findItem ? findItem.label : "未知";
+    },
+    forquestionType(row, column, cellValue, index) {
+      const findItem = questionType.find((item) => item.value == cellValue);
+      return findItem ? findItem.label : "未知";
+    },
+    forchkType(row, column, cellValue, index) {
+      const findItem = chkType.find((item) => item.value == cellValue + 1);
+      return findItem ? findItem.label : "待审核";
     },
     handleSizeChange(val) {
       this.params.pagesize = val;
