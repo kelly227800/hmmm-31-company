@@ -53,7 +53,7 @@ export function parseTime (time, cFormat) {
   })
   return timeStr
 }
-
+// 改为2019-04-24 16:52:13形式
 export function parseTimeByString (time, cFormat) {
   if (arguments.length === 0) {
     return null
