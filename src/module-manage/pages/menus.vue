@@ -7,7 +7,7 @@
           size="mini"
           icon="el-icon-edit"
           type="success"
-          @click="visibleMenu = true"
+          @click="addMenu"
         >
           添加菜单
         </el-button>
@@ -75,6 +75,7 @@
       :visibleMenu.sync="visibleMenu"
       :tableData="tableData"
       @addSuccess="getMenusList"
+      :editRow="editRow"
     ></AddMenu>
   </div>
 </template>
@@ -90,6 +91,7 @@ export default {
       treeProps: {
         children: "childs", //绑定childs为孩子
       },
+      editRow: {}, // 编辑项
     };
   },
   components: {
@@ -106,13 +108,15 @@ export default {
       const res = JSON.stringify(data);
       // console.log(res);
       const reg1 = /points/gi; // 定义正则
-      const tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
-      this.tableData = [{ id: 0, title: "主导航" }, ...tableData];
-      // console.log(this.tableData);
+      this.tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
+    },
+    addMenu() {
+      this.editRow = {};
+      this.visibleMenu = true;
     },
     editUser(row) {
-      console.log("编辑");
-      console.log(row);
+      this.editRow = row;
+      this.visibleMenu = true;
     },
     async delUser(row) {
       try {

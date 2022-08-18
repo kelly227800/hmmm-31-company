@@ -7,14 +7,24 @@
   >
     <el-form ref="form" :model="addForm" :rules="fromRules" label-width="120px">
       <el-form-item label="权限组名称 :">
-        <el-radio v-model="addForm.is_point" :label="false">菜单</el-radio>
-        <el-radio v-model="addForm.is_point" :label="true">权限点</el-radio>
+        <el-radio
+          :disabled="addForm.id ? true : false"
+          v-model="addForm.is_point"
+          :label="false"
+          >菜单</el-radio
+        >
+        <el-radio
+          :disabled="addForm.id ? true : false"
+          v-model="addForm.is_point"
+          :label="true"
+          >权限点</el-radio
+        >
       </el-form-item>
 
       <el-form-item label="权限组名称 :">
         <el-select ref="power" v-model="title" placeholder="请选择">
           <!-- <el-option :value="0" :label="$t('table.powerNav')">主导航</el-option> -->
-          <el-option class="treeSelect" :value="title">
+          <el-option class="treeSelect" v-model="title" label="">
             <el-tree
               :data="tableData"
               default-expand-all
@@ -43,12 +53,13 @@
 </template>
 
 <script>
-import { list, add } from "@/api/base/menus.js";
+import { list, add, update } from "@/api/base/menus.js";
 export default {
   name: "AddMenu",
   data() {
     return {
       powerList: [],
+      tableData: [],
       addForm: {
         is_point: false,
         pid: "",
@@ -75,17 +86,78 @@ export default {
       type: Boolean,
       default: false,
     },
-    // 父组件传过来的列表
-    tableData: {
-      type: Array,
-      default: () => [],
+    // // 父组件传过来的列表
+    // tableData: {
+    //   type: Array,
+    //   default: () => [],
+    // },
+    // 修改项
+    editRow: {
+      type: Object,
+      default: () => ({}),
     },
   },
-  created() {},
-  mounted() {},
-
+  watch: {
+    editRow: {
+      immediate: true,
+      handler() {
+        // 赋值属性值 方便回显
+        if (this.editRow.id) {
+          for (let key in this.addForm) {
+            if (this.editRow[key]) {
+              this.addForm[key] = this.editRow[key];
+            }
+          }
+          this.addForm.id = this.editRow.id;
+          // 数据回显 寻找权限组的title
+          this.findProweTitle(this.tableData, this.editRow.pid);
+        }
+        //
+      },
+    },
+  },
+  created() {
+    this.getMenusList();
+  },
   methods: {
-    onClose() {
+    async getMenusList() {
+      const { data } = await list();
+      const res = JSON.stringify(data);
+      // console.log(res);
+      const reg1 = /points/gi; // 定义正则
+      const tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
+      this.tableData = [{ id: 0, title: "主导航" }, ...tableData];
+      console.log(this.tableData);
+    },
+    // 数据回显 寻找权限组的title
+    findProweTitle(arr, pid) {
+      // 利用find寻找
+      return arr.find((item) => {
+        if (item.id == pid) {
+          this.title = item.title;
+          return;
+        } else if (item.childs) {
+          return this.findProweTitle(item.childs, pid);
+        }
+      });
+      // 利用map寻找
+      // return arr.map((item) => {
+      //   if (item.id == pid) {
+      //     this.title = item.title;
+      //     return item;
+      //   } else if (item.childs) {
+      //     return this.findProweTitle(item.childs, pid);
+      //   }
+      // });
+    },
+    async onClose() {
+      this.addForm = {
+        is_point: false,
+        pid: "",
+        code: "",
+        title: "",
+      };
+      await this.$refs.form.resetFields();
       this.$emit("update:visibleMenu", false);
     },
     // 点击权限组
@@ -100,33 +172,38 @@ export default {
     async onSave() {
       // console.log("确定添加");
       await this.$refs.form.validate();
-      try {
-        // console.log(this.addForm);
-        const res = await add(this.addForm);
-        this.$message.success("添加成功");
-        this.$emit("addSuccess");
-        // console.log(res);
-      } catch (error) {
-        this.$message.error("添加失败，请稍后重试");
+      if (this.addForm.id) {
+        try {
+          await update(this.addForm);
+          this.$message.success("修改成功");
+          this.onClose();
+          this.$emit("addSuccess");
+        } catch (error) {
+          this.$message.error("修改失败，请稍后重试");
+        }
+      } else {
+        try {
+          // console.log(this.addForm);
+          await add(this.addForm);
+          this.onClose();
+          this.$message.success("添加成功");
+          this.$emit("addSuccess");
+          // console.log(res);
+        } catch (error) {
+          this.$message.error("添加失败，请稍后重试");
+        }
       }
     },
     // 权限点  创建权限组的禁用
     renderContent(h, { node, data, store }) {
       // 如果处于权限 则让权限点禁用
-      if (this.addForm.is_point) {
-        if (data.is_point) {
-          return (
-            <span class="Disable">
-              <span>{node.label}</span>
-            </span>
-          );
-        } else {
-          return (
-            <span class="headerTree">
-              <span>{node.label}</span>
-            </span>
-          );
-        }
+
+      if (data.is_point) {
+        return (
+          <span class="Disable">
+            <span>{node.label}</span>
+          </span>
+        );
       } else {
         return (
           <span class="headerTree">
