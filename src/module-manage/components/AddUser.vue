@@ -147,7 +147,6 @@ export default {
   },
   created() {
     this.simple();
-    console.log(this.userItem);
   },
 
   methods: {
@@ -204,7 +203,7 @@ export default {
           this.onClose();
           this.$emit("add-success");
         } catch (error) {
-          console.log("未知错误");
+          this.$message.error("添加失败");
         }
       }
     },

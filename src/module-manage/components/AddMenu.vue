@@ -127,7 +127,7 @@ export default {
       const reg1 = /points/gi; // 定义正则
       const tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
       this.tableData = [{ id: 0, title: "主导航" }, ...tableData];
-      console.log(this.tableData);
+      // console.log(this.tableData);
     },
     // 数据回显 寻找权限组的title
     findProweTitle(arr, pid) {
