@@ -177,6 +177,7 @@ export default {
       pagesize: 10,
       subjectID: "",
       isTo: false,
+      isDel: false,
       isEdit: false,
       showDirectoryDialog: false,
       delDirectoryDialog: false,
@@ -237,17 +238,24 @@ export default {
     // 删除目录
     async confirmDel() {
       try {
+        this.isDel = true;
         await remove({ id: Number(this.id) });
         this.delDirectoryDialog = false;
         this.$message.success("操作成功");
         this.getDirectoryList();
       } catch (err) {
         this.$message.error("操作失败");
+      } finally {
+        this.isDel = false;
       }
     },
     // 获取目录列表
     async getDirectoryList() {
       let query = {};
+      // 如果删除时页面只剩一条数据
+      if (this.isDel && this.tableData.length == 1) {
+        this.page--;
+      }
       // 非学科跳转过来
       if (!this.isTo) {
         // 搜索框无关键字
@@ -335,6 +343,7 @@ export default {
         data: { items, counts },
       } = await list(query);
       this.tableData = items;
+      console.log(this.tableData.length);
       this.counts = counts;
       // console.log(data);
     },

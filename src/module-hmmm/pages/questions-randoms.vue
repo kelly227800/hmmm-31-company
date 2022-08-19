@@ -144,6 +144,7 @@ export default {
       page: 1,
       pagesize: 20,
       keyword: "",
+      isDel: false,
       delRandomsDialog: false,
       showQuestionsPreview: false,
     };
@@ -154,6 +155,7 @@ export default {
   methods: {
     // 点击搜索根据编号查询
     onSearch() {
+      this.page = 1;
       this.keyword = this.randomsForm.value;
       this.getData();
     },
@@ -165,17 +167,23 @@ export default {
     // 删除组题列表
     async confirmDel() {
       try {
+        this.isDel = true;
         await removeRandoms({ id: this.id });
         this.$message.success("删除成功");
         this.getData();
       } catch (err) {
         this.$message.error("删除失败");
       } finally {
+        this.isDel = false;
         this.delRandomsDialog = false;
       }
     },
     // 获取组题数据
     async getData() {
+      // 如果删除时页面只剩一条数据
+      if (this.isDel && this.randomsList.length == 1) {
+        this.page--;
+      }
       try {
         const query = {
           page: this.page,
