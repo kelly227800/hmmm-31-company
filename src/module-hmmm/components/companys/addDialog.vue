@@ -112,8 +112,7 @@ export default {
   },
   computed: {
     dialogTitle() {
-      this.flag = this.formBase.shortName ? 1 : 0;
-      return this.formBase.shortName ? "编辑用户" : "添加用户";
+      return this.flag ? "编辑用户" : "添加用户";
     },
   },
   methods: {
@@ -152,6 +151,7 @@ export default {
       }
     },
     async editDate(id) {
+      this.flag = 1;
       const res = await detail({ id });
       this.formBase = res.data;
       this.formBase.isFamous = this.formBase.isFamous ? true : false;

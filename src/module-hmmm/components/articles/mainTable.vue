@@ -9,7 +9,7 @@
             href="javascript:;"
             class="url"
             @click="videoDialog(scope.row)"
-            v-if="scope.row.videoURL !== null"
+            v-if="scope.row.videoURL"
             ref="click"
           >
             <i class="el-icon-film"></i>

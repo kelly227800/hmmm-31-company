@@ -86,7 +86,12 @@ export default {
           searchList[key] = params[key];
         }
       }
-      const res = await list(searchList);
+      let res = await list(searchList);
+      if (res.data.page > res.data.pages) {
+        searchList.page = res.data.pages;
+        console.log(searchList);
+        res = await list(searchList);
+      }
       this.tableData = res.data.items;
       this.total = res.data.counts;
     },
