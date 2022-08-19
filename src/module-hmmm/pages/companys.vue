@@ -79,9 +79,9 @@ export default {
 
   methods: {
     open1() {
-      const h = this.$createElement;
       this.$notify({
-        message: h("i", { style: "color: teal" }, "姚淑怡"),
+        message: "姚淑怡",
+        type: "success",
       });
     },
     async getCompanyInfo(params) {
