@@ -47,4 +47,7 @@ export default {
   padding: 0 10px;
   margin: 10px 0;
 }
+::v-deep img{
+  width: 100%;
+}
 </style>

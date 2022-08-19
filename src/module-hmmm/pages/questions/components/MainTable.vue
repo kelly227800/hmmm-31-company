@@ -61,11 +61,14 @@
         :formatter="forchkType"
       ></el-table-column>
       <el-table-column
-        prop="remarks"
         label="审核意见"
         align="center"
         width="180px"
-      ></el-table-column>
+      >
+      <template slot-scope="{ row }">
+          <div v-html="row.remarks"></div>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="creator"
         label="审核人"
