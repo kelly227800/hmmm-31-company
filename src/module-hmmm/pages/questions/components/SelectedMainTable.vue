@@ -147,29 +147,11 @@ export default {
 
   methods: {
     async getchoice() {
-      if (this.chkState === "all") {
-        this.params = {
-          page: 1,
-          pagesize: 5,
-        };
-        this.tableloading = true;
-        const { data } = await list(this.params);
-        this.total = data.counts;
-        this.tableData = data.items;
-        this.tableloading = false;
-      } else {
-        this.params = {
-          page: 1,
-          pagesize: 5,
-          chkState: this.chkState,
-        };
-        this.tableloading = true;
-
-        const { data } = await list(this.params);
-        this.total = data.counts;
-        this.tableData = data.items;
-        this.tableloading = false;
-      }
+      this.tableloading = true;
+      const { data } = await list(this.params);
+      this.total = data.counts;
+      this.tableData = data.items;
+      this.tableloading = false;
     },
 
     handleSizeChange(val) {
@@ -186,7 +168,7 @@ export default {
       this.questionDetail = data;
       console.log(this.questionDetail.videoURL);
       if (!this.questionDetail.videoURL?.endsWith(".mp4")) {
-        this.questionDetail.videoURL = "../../../../assets/默认地址.mp4";
+        this.questionDetail.videoURL = "https://v-cdn.zjol.com.cn/277004.mp4";
       }
     },
     upgo(id) {
@@ -208,6 +190,12 @@ export default {
             type: "success",
             message: "删除成功!",
           });
+          if (this.tableData.length === 1) {
+            this.params.page--;
+            this.getchoice();
+          } else {
+            this.getchoice();
+          }
         })
         .catch(() => {
           // this.$message({
@@ -229,7 +217,12 @@ export default {
             type: "success",
             message: "加入精选成功",
           });
-          this.getchoice();
+          if (this.tableData.length === 1) {
+            this.params.page--;
+            this.getchoice();
+          } else {
+            this.getchoice();
+          }
         })
         .catch(() => {
           // this.$message({

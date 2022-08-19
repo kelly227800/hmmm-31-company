@@ -251,6 +251,9 @@ export default {
         province: "",
         city: "",
       };
+      this.cityslist = [];
+      this.directoryslist = [];
+      this.tagslist = [];
     },
     async Searchfn() {
       const data = { page: 1, pagesize: 5 };

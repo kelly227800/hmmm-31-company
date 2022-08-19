@@ -73,11 +73,17 @@ export default {
   },
 
   created() {
-    // alert("姚淑怡");
+    this.open1();
     this.getCompanyInfo(this.params);
   },
 
   methods: {
+    open1() {
+      this.$notify({
+        message: "姚淑怡",
+        type: "success",
+      });
+    },
     async getCompanyInfo(params) {
       let searchList = {};
       // 判断传的数据中，有没有值为空值，空值则直接请求时候不传
@@ -86,7 +92,12 @@ export default {
           searchList[key] = params[key];
         }
       }
-      const res = await list(searchList);
+      let res = await list(searchList);
+      if (res.data.page > res.data.pages) {
+        searchList.page = res.data.pages;
+        console.log(searchList);
+        res = await list(searchList);
+      }
       this.tableData = res.data.items;
       this.total = res.data.counts;
     },

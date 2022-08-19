@@ -30,7 +30,7 @@
           background
           layout="prev, pager, next,sizes,jumper"
           :total="total"
-          :page-sizes="[10, 20, 30, 50]"
+          :page-sizes="[5, 10, 20, 50]"
           :page-size="params.pagesize"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -79,11 +79,17 @@ export default {
   },
 
   created() {
-    // alert("姚淑怡");
+    this.open1();
     this.getArticlesInfo(this.params);
   },
 
   methods: {
+    open1() {
+      this.$notify({
+        message: "姚淑怡",
+        type: "success",
+      });
+    },
     async getArticlesInfo(params) {
       let searchList = {};
       // 判断传的数据中，有没有值为空值，空值则直接请求时候不传
@@ -92,7 +98,11 @@ export default {
           searchList[key] = params[key];
         }
       }
-      const res = await list(searchList);
+      let res = await list(searchList);
+      if (res.data.page > res.data.pages) {
+        searchList.page = res.data.pages;
+        res = await list(searchList);
+      }
       this.tableData = res.data.items;
       this.total = res.data.counts;
     },

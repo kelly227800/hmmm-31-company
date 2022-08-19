@@ -2,15 +2,20 @@
   <el-breadcrumb class="app-breadcrumb" separator="/">
     <transition-group name="breadcrumb">
       <el-breadcrumb-item
-        v-for="(item,index)  in levelList"
+        v-for="(item, index) in levelList"
         :key="item.path"
         v-if="item.meta.title"
       >
         <span
-          v-if="(item.redirect==='noredirect') || (index === levelList.length-1)"
+          v-if="
+            item.redirect === 'noredirect' || index === levelList.length - 1
+          "
           class="no-redirect"
-        >{{item.meta.title}}</span>
-        <router-link v-else :to="item.redirect||item.path">{{item.meta.title}}</router-link>
+          >{{ item.meta.title }}</span
+        >
+        <router-link v-else :to="item.redirect || item.path">{{
+          item.meta.title
+        }}</router-link>
       </el-breadcrumb-item>
     </transition-group>
   </el-breadcrumb>
@@ -20,33 +25,33 @@
 // import { generateTitle } from '@/utils/i18n'
 
 export default {
-  created () {
-    this.getBreadcrumb()
+  created() {
+    this.getBreadcrumb();
   },
-  data () {
+  data() {
     return {
-      levelList: null
-    }
+      levelList: null,
+    };
   },
   watch: {
-    $route () {
-      this.getBreadcrumb()
-    }
+    $route() {
+      this.getBreadcrumb();
+    },
   },
   methods: {
     // generateTitle,
-    getBreadcrumb () {
-      let matched = this.$route.matched.filter(item => item.name)
-      const first = matched[0]
-      if (first && first.name !== 'dashboard') {
-        matched = [{ path: '/dashboard', meta: { title: '面板' } }].concat(
+    getBreadcrumb() {
+      let matched = this.$route.matched.filter((item) => item.name);
+      const first = matched[0];
+      if (first && first.name !== "dashboard") {
+        matched = [{ path: "/dashboard", meta: { title: "面板" } }].concat(
           matched
-        )
+        );
       }
-      this.levelList = matched
-    }
-  }
-}
+      this.levelList = matched;
+    },
+  },
+};
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
