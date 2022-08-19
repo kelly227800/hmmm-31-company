@@ -30,7 +30,7 @@
           background
           layout="prev, pager, next,sizes,jumper"
           :total="total"
-          :page-sizes="[10, 20, 30, 50]"
+          :page-sizes="[5, 10, 20, 50]"
           :page-size="params.pagesize"
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -79,11 +79,17 @@ export default {
   },
 
   created() {
-    // alert("姚淑怡");
+    this.open1();
     this.getArticlesInfo(this.params);
   },
 
   methods: {
+    open1() {
+      const h = this.$createElement;
+      this.$notify({
+        message: h("i", { style: "color: teal" }, "姚淑怡"),
+      });
+    },
     async getArticlesInfo(params) {
       let searchList = {};
       // 判断传的数据中，有没有值为空值，空值则直接请求时候不传

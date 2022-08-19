@@ -73,11 +73,17 @@ export default {
   },
 
   created() {
-    // alert("姚淑怡");
+    this.open1();
     this.getCompanyInfo(this.params);
   },
 
   methods: {
+    open1() {
+      const h = this.$createElement;
+      this.$notify({
+        message: h("i", { style: "color: teal" }, "姚淑怡"),
+      });
+    },
     async getCompanyInfo(params) {
       let searchList = {};
       // 判断传的数据中，有没有值为空值，空值则直接请求时候不传
