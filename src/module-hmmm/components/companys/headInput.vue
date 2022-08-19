@@ -115,6 +115,7 @@ export default {
         shortName: "", //企业简称
         state: "", //状态：1启用0禁用
       };
+      this.provincesFn("");
       this.$emit("render", this.formCompany);
     },
     // 城市下拉框值改变的时候

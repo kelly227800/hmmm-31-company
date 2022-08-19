@@ -61,11 +61,14 @@
         :formatter="forchkType"
       ></el-table-column>
       <el-table-column
-        prop="remarks"
         label="审核意见"
         align="center"
         width="180px"
-      ></el-table-column>
+      >
+      <template slot-scope="{ row }">
+          <div v-html="row.remarks"></div>
+        </template>
+      </el-table-column>
       <el-table-column
         prop="creator"
         label="审核人"
@@ -258,7 +261,12 @@ export default {
               type: "success",
               message: "删除成功!",
             });
+            if (this.tableData.length === 1) {
+            this.params.page--;
             this.getchoice();
+          } else {
+            this.getchoice();
+          }
           })
           .catch(() => {
             // this.$message({

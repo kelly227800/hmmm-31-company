@@ -17,25 +17,34 @@
       >
         <el-form-item label="用户名:" prop="username">
           <el-input
-            v-model="addForm.username"
+            v-model.trim="addForm.username"
             placeholder="请输入用户名"
           ></el-input>
         </el-form-item>
         <el-form-item label="邮箱:" prop="email">
-          <el-input v-model="addForm.email" placeholder="请输入邮箱"></el-input>
+          <el-input
+            v-model.trim="addForm.email"
+            placeholder="请输入邮箱"
+          ></el-input>
         </el-form-item>
         <el-form-item label="密码:" prop="password">
           <el-input
             placeholder="请输入密码"
-            v-model="addForm.password"
+            v-model.trim="addForm.password"
             show-password
           ></el-input>
         </el-form-item>
         <el-form-item label="角色:" prop="role">
-          <el-input v-model="addForm.role" placeholder="请选择角色"></el-input>
+          <el-input
+            v-model.trim="addForm.role"
+            placeholder="请选择角色"
+          ></el-input>
         </el-form-item>
         <el-form-item label="权限组名称:" prop="permission_group_id">
-          <el-select v-model="addForm.permission_group_id" placeholder="请选择">
+          <el-select
+            v-model.trim="addForm.permission_group_id"
+            placeholder="请选择"
+          >
             <el-option
               v-for="item in powerList"
               :key="item.id"
@@ -48,13 +57,13 @@
           <el-input
             placeholder="请输入电话"
             maxlength="11"
-            v-model="addForm.phone"
+            v-model.trim="addForm.phone"
           ></el-input>
         </el-form-item>
         <el-form-item label="介绍:" prop="introduction">
           <el-input
             type="textarea"
-            v-model="addForm.introduction"
+            v-model.trim="addForm.introduction"
             placeholder="说点什么吧"
           ></el-input>
         </el-form-item>
