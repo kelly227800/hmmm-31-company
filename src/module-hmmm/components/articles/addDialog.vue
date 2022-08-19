@@ -90,8 +90,7 @@ export default {
   },
   computed: {
     dialogTitle() {
-      this.flag = this.formBase.title ? 1 : 0;
-      return this.formBase.title ? "修改文章" : "新增文章";
+      return this.flag ? "修改文章" : "新增文章";
     },
   },
   methods: {
@@ -122,6 +121,7 @@ export default {
     },
     // 修改的时候
     async editDate(row) {
+      this.flag = 1;
       this.formBase.id = row.id;
       this.formBase.title = row.title;
       this.formBase.articleBody = row.articleBody;
