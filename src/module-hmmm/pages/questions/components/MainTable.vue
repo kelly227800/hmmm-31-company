@@ -261,7 +261,12 @@ export default {
               type: "success",
               message: "删除成功!",
             });
+            if (this.tableData.length === 1) {
+            this.params.page--;
             this.getchoice();
+          } else {
+            this.getchoice();
+          }
           })
           .catch(() => {
             // this.$message({
