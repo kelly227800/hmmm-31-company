@@ -9,22 +9,22 @@
       <el-form-item label="权限组名称 :">
         <el-radio
           :disabled="addForm.id ? true : false"
-          v-model="addForm.is_point"
+          v-model.trim="addForm.is_point"
           :label="false"
           >菜单</el-radio
         >
         <el-radio
           :disabled="addForm.id ? true : false"
-          v-model="addForm.is_point"
+          v-model.trim="addForm.is_point"
           :label="true"
           >权限点</el-radio
         >
       </el-form-item>
 
       <el-form-item label="权限组名称 :">
-        <el-select ref="power" v-model="title" placeholder="请选择">
+        <el-select ref="power" v-model.trim="title" placeholder="请选择">
           <!-- <el-option :value="0" :label="$t('table.powerNav')">主导航</el-option> -->
-          <el-option class="treeSelect" v-model="title" label="">
+          <el-option class="treeSelect" v-model.trim="title" label="">
             <el-tree
               :data="tableData"
               default-expand-all
@@ -38,11 +38,11 @@
       </el-form-item>
 
       <el-form-item label="权限代码 :" prop="code">
-        <el-input v-model="addForm.code"></el-input>
+        <el-input v-model.trim="addForm.code"></el-input>
       </el-form-item>
 
       <el-form-item label="权限标题 :" prop="title">
-        <el-input v-model="addForm.title"></el-input>
+        <el-input v-model.trim="addForm.title"></el-input>
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -59,7 +59,7 @@ export default {
   data() {
     return {
       powerList: [],
-      tableData: [],
+      // tableData: [],
       addForm: {
         is_point: false,
         pid: "",
@@ -86,11 +86,11 @@ export default {
       type: Boolean,
       default: false,
     },
-    // // 父组件传过来的列表
-    // tableData: {
-    //   type: Array,
-    //   default: () => [],
-    // },
+    // 父组件传过来的列表
+    tableData: {
+      type: Array,
+      default: () => [],
+    },
     // 修改项
     editRow: {
       type: Object,
@@ -101,7 +101,6 @@ export default {
     editRow: {
       immediate: true,
       handler() {
-        // 赋值属性值 方便回显
         if (this.editRow.id) {
           for (let key in this.addForm) {
             if (this.editRow[key]) {
@@ -109,26 +108,16 @@ export default {
             }
           }
           this.addForm.id = this.editRow.id;
-          // 数据回显 寻找权限组的title
+          // // 数据回显 寻找权限组的title
           this.findProweTitle(this.tableData, this.editRow.pid);
         }
-        //
       },
     },
   },
   created() {
-    this.getMenusList();
+    // this.getMenusList();
   },
   methods: {
-    async getMenusList() {
-      const { data } = await list();
-      const res = JSON.stringify(data);
-      // console.log(res);
-      const reg1 = /points/gi; // 定义正则
-      const tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
-      this.tableData = [{ id: 0, title: "主导航" }, ...tableData];
-      // console.log(this.tableData);
-    },
     // 数据回显 寻找权限组的title
     findProweTitle(arr, pid) {
       // 利用find寻找
