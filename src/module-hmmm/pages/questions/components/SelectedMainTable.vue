@@ -147,29 +147,11 @@ export default {
 
   methods: {
     async getchoice() {
-      if (this.chkState === "all") {
-        this.params = {
-          page: 1,
-          pagesize: 5,
-        };
-        this.tableloading = true;
-        const { data } = await list(this.params);
-        this.total = data.counts;
-        this.tableData = data.items;
-        this.tableloading = false;
-      } else {
-        this.params = {
-          page: 1,
-          pagesize: 5,
-          chkState: this.chkState,
-        };
-        this.tableloading = true;
-
-        const { data } = await list(this.params);
-        this.total = data.counts;
-        this.tableData = data.items;
-        this.tableloading = false;
-      }
+      this.tableloading = true;
+      const { data } = await list(this.params);
+      this.total = data.counts;
+      this.tableData = data.items;
+      this.tableloading = false;
     },
 
     handleSizeChange(val) {
@@ -208,6 +190,12 @@ export default {
             type: "success",
             message: "删除成功!",
           });
+          if (this.tableData.length === 1) {
+            this.params.page--;
+            this.getchoice();
+          } else {
+            this.getchoice();
+          }
         })
         .catch(() => {
           // this.$message({
@@ -229,7 +217,12 @@ export default {
             type: "success",
             message: "加入精选成功",
           });
-          this.getchoice();
+          if (this.tableData.length === 1) {
+            this.params.page--;
+            this.getchoice();
+          } else {
+            this.getchoice();
+          }
         })
         .catch(() => {
           // this.$message({
