@@ -19,6 +19,11 @@
         row-key="id"
         default-expand-all
         :tree-props="{ children: 'childs', hasChildren: 'hasChildren' }"
+        :header-cell-style="{
+          background: '#f4f4f5',
+          color: '#909399',
+          'text-align': 'center',
+        }"
       >
         <el-table-column label="标题" width="180">
           <template slot-scope="{ row }">
@@ -73,7 +78,7 @@
     <AddMenu
       v-if="visibleMenu"
       :visibleMenu.sync="visibleMenu"
-      :tableData="tableData"
+      :tableData="dialogTreeTable"
       @addSuccess="getMenusList"
       :editRow="editRow"
     ></AddMenu>
@@ -92,12 +97,14 @@ export default {
         children: "childs", //绑定childs为孩子
       },
       editRow: {}, // 编辑项
+      dialogTreeTable: [],
     };
   },
   components: {
     AddMenu,
   },
   created() {
+    this.$message.success("刘超开发，代码和我总得跑一个");
     this.getMenusList();
   },
 
@@ -109,6 +116,9 @@ export default {
       // console.log(res);
       const reg1 = /points/gi; // 定义正则
       this.tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
+      this.dialogTreeTable = [
+        { id: 0, title: "主导航", childs: [...this.tableData] },
+      ]; // 截取points替换为childs
     },
     addMenu() {
       this.editRow = {};

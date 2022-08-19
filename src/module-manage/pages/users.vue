@@ -30,7 +30,15 @@
         <template #title>共 {{ total }} 条记录 </template>
       </el-alert>
       <!-- 表格 -->
-      <el-table :data="tableData" style="width: 100%">
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        :header-cell-style="{
+          background: '#f4f4f5',
+          color: '#909399',
+          'text-align': 'center',
+        }"
+      >
         <el-table-column align="center" prop="id" label="序号">
         </el-table-column>
         <el-table-column align="center" prop="email" label="邮箱">
@@ -144,6 +152,7 @@ export default {
     UserAdd,
   },
   created() {
+    this.$message.success("刘超开发，代码和我总得跑一个");
     this.getUserList();
   },
 
@@ -190,7 +199,15 @@ export default {
     async delUser(row) {
       await remove(row);
       this.$message.success("用户已删除");
-      this.getUserList();
+      // 一页删除完  就显示上一页
+      if (this.tableData.length === 1) {
+        console.log(this.params.page);
+        this.params.page--;
+        console.log(this.params.page);
+        this.getPermList();
+      } else {
+        this.getPermList();
+      }
     },
   },
 };
@@ -200,7 +217,7 @@ export default {
 .box-card {
   width: 100%;
   height: 100%;
-  background-color: pink;
+  background-color: #fff;
   // 搜索框
   .userSerch {
     display: flex;
