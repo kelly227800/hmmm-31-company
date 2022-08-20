@@ -1,5 +1,12 @@
 <template>
-  <el-dialog @close="onClose" title="提示" :visible="visible" width="30%">
+  <el-dialog
+    v-loading="loading"
+    element-loading-text="拼命加载中..."
+    @close="onClose"
+    :title="ruleForm.id ? '编辑权限' : '新增权限'"
+    :visible="visible"
+    width="30%"
+  >
     <!-- 表单 -->
     <el-form
       :model="ruleForm"
@@ -15,7 +22,6 @@
         <el-tree
           @check-change="checkChange"
           ref="myTree"
-          @node-collapse="nodeCollapse"
           :default-checked-keys="defaultCheckedKeys"
           node-key="id"
           default-expand-all
@@ -54,6 +60,7 @@ export default {
       },
       treeData: [], // 树形数据
       defaultCheckedKeys: [], // 记住权限选中
+      loading: false,
     };
   },
   props: {
@@ -74,6 +81,7 @@ export default {
   methods: {
     // 获取权限列表
     async getMenusList() {
+      this.loading = true;
       const { data } = await list();
       const res = JSON.stringify(data);
       // console.log(res);
@@ -82,6 +90,7 @@ export default {
       this.treeData = [
         { id: 0, title: "系统菜单和页面权限点", childs: [...treeData] },
       ];
+      this.loading = false;
     },
     // 编辑 根据id查看详情
     async getPower() {
@@ -103,6 +112,9 @@ export default {
     // 提交
     async onSave() {
       await this.$refs.form.validate();
+      if (this.defaultCheckedKeys.length == 0) {
+        return this.$message.error("你还没有分配权限呢");
+      }
       // console.log(1);
       // 根据id判断 是编辑 还是新增
       if (this.ruleForm.id) {
@@ -133,6 +145,7 @@ export default {
         }
       }
     },
+
     // 选中权限
     checkChange(data, checked, indeterminate) {
       const one = this.$refs.myTree.getCheckedNodes();
@@ -140,9 +153,14 @@ export default {
       this.defaultCheckedKeys = one2;
       // console.log(this.defaultCheckedKeys);
     },
-    nodeCollapse(data, checked, indeterminate) {
-      console.log(2);
-    },
+
+    // open() {
+    //   this.$confirm("此操作将永久删除, 是否继续?", "提示", {
+    //     confirmButtonText: "确定",
+    //     cancelButtonText: "取消",
+    //     type: "warning",
+    //   }).then(async () => {});
+    // },
   },
 };
 </script>

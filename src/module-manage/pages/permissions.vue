@@ -32,6 +32,8 @@
 
       <!-- 表格 -->
       <el-table
+        v-loading="loading"
+        element-loading-text="拼命加载中..."
         ref="multipleTable"
         :data="permList"
         tooltip-effect="dark"
@@ -124,6 +126,7 @@ export default {
       },
       showEditPower: false,
       editPowerObj: {},
+      loading: false,
     };
   },
   watch: {
@@ -137,17 +140,23 @@ export default {
     EditPower,
   },
   created() {
-    this.$message.success("刘超开发，代码和我总得跑一个");
     this.getPermList(this.params);
+    // this.$message.success(" 刘超  ，代码和我总得跑一个");
+  },
+  mounted() {
+    this.$message.success(" 刘超  ，代码和我总得跑一个");
   },
 
   methods: {
     // 获取列表
     async getPermList(params) {
+      this.loading = true;
+
       const { data } = await list(params);
       this.total = data.counts;
       this.permList = data.list;
       // console.log(data.list);
+      this.loading = false;
     },
     // 搜索用户
     serchUser() {
@@ -166,22 +175,28 @@ export default {
     },
     // 删除
     async delPower(row) {
-      try {
-        const res = await remove(row);
-        console.log(res);
-        this.$message.success("删除成功");
-        // 一页删除完  就显示上一页
-        if (this.permList.length === 1) {
-          console.log(this.params.page);
-          this.params.page--;
-          console.log(this.params.page);
-          this.getPermList(this.params);
-        } else {
-          this.getPermList(this.params);
+      this.$confirm("此操作将永久删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(async () => {
+        try {
+          const res = await remove(row);
+          console.log(res);
+          this.$message.success("删除成功");
+          // 一页删除完  就显示上一页
+          if (this.permList.length === 1) {
+            console.log(this.params.page);
+            this.params.page--;
+            console.log(this.params.page);
+            this.getPermList(this.params);
+          } else {
+            this.getPermList(this.params);
+          }
+        } catch (error) {
+          this.$message.error("删除失败，请重试");
         }
-      } catch (error) {
-        this.$message.error("删除失败，请重试");
-      }
+      });
     },
     // 更改每一页多少条的时候触发
     handleSizeChange(val) {
