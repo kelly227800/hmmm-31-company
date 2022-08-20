@@ -358,6 +358,8 @@ export default {
     this.getTagsList();
     this.$notify({
       title: "金倩倩",
+      type: 'success',
+      duration: 3000
     });
   },
   components: {

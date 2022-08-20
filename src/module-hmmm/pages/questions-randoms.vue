@@ -223,13 +223,17 @@ export default {
     },
     // 获取试题详情数据
     async getQuestionsDetail(questionId) {
-      const { data } = await detail({ id: questionId });
-      this.questionDetail = data;
-      console.log(this.questionDetail);
+      try {
+        const { data } = await detail({ id: questionId });
+        this.questionDetail = data;
+        console.log(this.questionDetail);
+        this.showQuestionsPreview = true;
+      } catch (err) {
+        this.$message.error("获取试题数据失败");
+      }
     },
-    // 点击试题编号 显示试题预览框
+    // 点击试题编号
     clickQuestion(questionIDs, e) {
-      this.showQuestionsPreview = true;
       let number = e.target.innerHTML;
       let item = questionIDs.find((item) => item.number === number);
       let questionId = item.id;
@@ -241,6 +245,8 @@ export default {
     this.getData();
     this.$notify({
       title: "金倩倩",
+      type: "success",
+      duration: 3000,
     });
   },
 };

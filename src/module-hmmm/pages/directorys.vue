@@ -373,6 +373,8 @@ export default {
     // console.log(this.isTo);
     this.$notify({
       title: "金倩倩",
+      type: "success",
+      duration: 3000,
     });
   },
   components: {
