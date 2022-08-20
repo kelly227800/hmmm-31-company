@@ -1,6 +1,8 @@
 <template>
   <div class="add-form">
     <el-dialog
+      v-loading="loading"
+      element-loading-text="拼命加载中..."
       @close="onClose"
       :title="addForm.id ? '编辑用户' : '创建用户'"
       :visible="visible"
@@ -142,6 +144,7 @@ export default {
       },
       //   权限组
       powerList: [],
+      loading: false,
     };
   },
   props: {
@@ -163,6 +166,7 @@ export default {
     async simple() {
       // console.log(this.userItem.id);
       if (this.userItem.id) {
+        this.loading = true;
         // this.addForm = { ...this.userItem };
         // 利用for in把父组件得值 赋值给子组件
         for (let key in this.addForm) {
@@ -177,6 +181,7 @@ export default {
       // 获取权限组
       const { data } = await simple();
       this.powerList = data;
+      this.loading = false;
     },
     //隐藏
     onClose() {
