@@ -28,7 +28,7 @@
         <el-form-item label="标签名称" prop="name">
           <el-input
             v-model="tagForm.name"
-            placeholder="请输入目录名称"
+            placeholder="请输入标签名称"
           ></el-input>
         </el-form-item>
       </el-form>
