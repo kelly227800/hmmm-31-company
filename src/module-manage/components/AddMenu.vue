@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     @close="onClose"
-    title="创建菜单"
+    :title="editRow.id ? '修改菜单' : '创建菜单'"
     :visible="visibleMenu"
     width="50%"
   >
