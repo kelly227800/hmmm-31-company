@@ -1,8 +1,6 @@
 <template>
   <el-card class="box-card">
     <div class="container">
-      <!-- 头部 -->
-
       <div slot="left" class="flex">
         学科名称
         <el-input
@@ -20,8 +18,7 @@
           >新增学科</el-button
         >
       </div>
-
-      <div class="shuju">
+      <div class="total">
         <i class="el-icon-info"></i><span>数据一共{{ total }}条</span>
       </div>
       <!-- 表格 -->
@@ -37,12 +34,7 @@
             {{ row.addDate }}
           </template>
         </el-table-column>
-        <el-table-column
-          label="前台是否显示"
-          width="180"
-          :formatter="formatterenableState"
-          prop="isFrontDisplay"
-        >
+        <el-table-column label="前台是否显示" width="180" prop="isFrontDisplay">
         </el-table-column>
         <el-table-column label="二级目录" width="180" prop="twoLevelDirectory">
         </el-table-column>
@@ -52,13 +44,13 @@
 
         <el-table-column label="操作" width="280">
           <template slot-scope="{ row }">
-            <el-button type="text" size="small" @click="xueke(row)"
+            <el-button type="text" size="small" @click="getSubject(row)"
               >学科分类</el-button
             >
-            <el-button type="text" size="small" @click="biaoqian(row)"
+            <el-button type="text" size="small" @click="geTtags(row)"
               >学科标签</el-button
             >
-            <el-button type="text" size="small" @click="xiugai(row)"
+            <el-button type="text" size="small" @click="edit(row)"
               >修改</el-button
             >
             <el-button type="text" size="small" @click="delbtn(row)"
@@ -75,8 +67,7 @@
         layout="prev, pager, next,sizes"
       />
     </div>
-    <!-- //新增弹窗 -->
-    <el-dialog :title="addor" :visible.sync="dialogVisible" width="35%">
+    <el-dialog :title="titleName" :visible.sync="dialogVisible" width="35%">
       <el-form ref="form" :model="form" label-width="80px" :rules="rules">
         <el-form-item label="学科名称" prop="name">
           <el-input v-model="form.subjectName"></el-input>
@@ -91,7 +82,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="onClose">取 消</el-button>
-        <el-button type="primary" @click="postadd">确 定</el-button>
+        <el-button type="primary" @click="onSure">确 定</el-button>
       </span>
     </el-dialog>
     <!-- 删除弹框 -->
@@ -102,7 +93,7 @@
       >
       <span slot="footer" class="dialog-footer">
         <el-button @click="onClose">取 消</el-button>
-        <el-button type="primary" @click="delet">确 定</el-button>
+        <el-button type="primary" @click="deleteFn">确 定</el-button>
       </span>
     </el-dialog>
   </el-card>
@@ -146,39 +137,30 @@ export default {
   created() {
     this.list();
   },
-  components: {
-    // employees,
-  },
+  components: {},
   computed: {
-    addor() {
+    titleName() {
       return this.form.id ? "编辑" : "添加";
     },
   },
   methods: {
     //学科跳转
-    xueke(val) {
-      // const id = val.id;
-      // const name = val.subjectName;
+    getSubject(val) {
       this.$router.push({
         path: "/subjects/directorys",
         query: { val },
       });
-      // console.log(val);
-      // this.$emit("xuekeguanli", val);
     },
-    //标签跳转
-    biaoqian(val) {
+    geTtags(val) {
       this.$router.push({
         path: "/subjects/tags",
         query: { val },
       });
     },
-    //切页触发
     handleCurrentChange(val) {
       this.Pages.page = val;
       this.list();
     },
-    //选择一页展示多少个触发
     handleSizeChange(val) {
       this.Pages.pagesize = val;
       this.list();
@@ -189,13 +171,6 @@ export default {
       this.tableData = res.data.items;
       this.total = res.data.counts;
     },
-    //判断是否前台显示
-    formatterenableState(rrow, column, cellValue, indexow) {
-      const findItem = hireType.find((item) => item.id === cellValue);
-      // console.log(cellValue)
-      return findItem ? findItem.label : "未知";
-    },
-    //查找
     async search() {
       const res = await list({
         subjectName: this.input || null,
@@ -206,7 +181,6 @@ export default {
     remove() {
       this.input = "";
     },
-    //新增
     onClose() {
       this.isshow = false;
       this.dialogVisible = false;
@@ -215,7 +189,7 @@ export default {
     addbtn() {
       this.dialogVisible = true;
     },
-    async postadd() {
+    async onSure() {
       if (this.form.id) {
         await update(this.form);
         this.$message.success("修改成功");
@@ -233,18 +207,16 @@ export default {
         } catch (error) {}
       }
     },
-    //修改
-    xiugai(val) {
+    edit(val) {
       console.log(val);
       this.dialogVisible = true;
       this.form = val;
     },
-    //删除
     delbtn(val) {
       this.isshow = true;
       this.form = val;
     },
-    async delet() {
+    async deleteFn() {
       await remove(this.form);
       this.$message.success("删除成功");
       this.onClose();
@@ -267,7 +239,7 @@ export default {
     margin: 0 20px;
   }
 }
-.shuju {
+.total {
   margin: 10px 0;
   background-color: #f4f4f5;
   color: #99a7b4;
