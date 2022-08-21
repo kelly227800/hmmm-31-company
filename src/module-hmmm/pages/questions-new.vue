@@ -122,7 +122,7 @@
         </el-form-item>
         <!-- 多选表单 -->
         <el-form-item label="选项" v-if="isShowS">
-          <el-checkbox-group v-model="form.checkbox">
+          <el-checkbox-group v-model="checkbox">
             <div
               class="options-group"
               v-for="item in form.options"
@@ -389,12 +389,16 @@ export default {
       // console.log(res);
       this.subjectDirection = data;
     },
+    // 切换试题类型
     selectDiff(val) {
+      console.log(val);
       if (val === "单选") {
         (this.isShow = true), (this.isShowS = false), (this.isDisabled = true);
       }
       if (val === "多选") {
+        console.log(1);
         (this.isShow = false), (this.isShowS = true), (this.isDisabled = false);
+        console.log(2);
       }
       if (val === "简答") {
         (this.isShow = false),
