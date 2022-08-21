@@ -4,10 +4,10 @@
       <div slot="header" class="clearfix">
         <span>试题录入</span>
       </div>
-      <el-form ref="form" :model="form" label-width="80px">
-        <el-form-item label="学科">
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="学科" prop="subjectID">
           <el-select
-            v-model="form.subjects"
+            v-model="form.subjectID"
             placeholder="请选择"
             @change="subjectFn"
             ref="subId"
@@ -20,8 +20,8 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="目录">
-          <el-select v-model="form.catalog" placeholder="请选择">
+        <el-form-item label="目录" prop="catalogID">
+          <el-select v-model="form.catalogID" placeholder="请选择">
             <el-option
               v-for="item in subjectDirection"
               :key="item.value"
@@ -30,18 +30,22 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="企业">
-          <el-select v-model="form.company" placeholder="请选择">
+        <el-form-item label="企业" prop="enterpriseID">
+          <el-select v-model="form.enterpriseID" placeholder="请选择">
             <el-option
               v-for="item in companysList"
               :key="item.id"
               :label="item.company"
-              :value="item.company"
+              :value="item.id"
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="城市">
-          <el-select v-model="form.city" placeholder="请选择" @change="areaFn">
+        <el-form-item label="城市" prop="province">
+          <el-select
+            v-model="form.province"
+            placeholder="请选择"
+            @change="areaFn"
+          >
             <el-option
               v-for="item in provincesList"
               :key="item"
@@ -49,7 +53,9 @@
               :value="item"
             ></el-option>
           </el-select>
-          <el-select v-model="form.area" placeholder="请选择">
+        </el-form-item>
+        <el-form-item prop="city">
+          <el-select v-model="form.city" placeholder="请选择">
             <el-option
               v-for="item in areaList"
               :key="item"
@@ -58,7 +64,7 @@
             ></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="方向">
+        <el-form-item label="方向" prop="direction">
           <el-select v-model="form.direction" placeholder="请选择">
             <el-option
               v-for="item in directionList"
@@ -70,7 +76,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="提醒">
-          <el-radio-group v-model="form.remind" @change="selectDiff">
+          <el-radio-group v-model="form.questionType" @change="selectDiff">
             <el-radio label="单选"></el-radio>
             <el-radio label="多选"></el-radio>
             <el-radio label="简答"></el-radio>
@@ -83,11 +89,11 @@
             <el-radio label="困难"></el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="题干" class="local-quill-editor">
+        <el-form-item label="题干" class="local-quill-editor" prop="question">
           <quill-editor
             ref="myLQuillEditor"
-            v-model="form.stem"
-            :options="form.editorOption"
+            v-model="form.question"
+            :options="editorOption"
             class="editor"
             @blur="onEditorBlur"
             @focus="onEditorFocus"
@@ -95,95 +101,61 @@
           >
           </quill-editor>
         </el-form-item>
+        <!-- 单选表单 -->
         <el-form-item label="选项" v-if="isShow">
-          <el-radio-group v-model="form.options">
-            <div class="options-group">
-              <el-radio label="A"> </el-radio>
+          <el-radio-group v-model="radioSelect">
+            <div
+              class="options-group"
+              v-for="item in form.options"
+              :key="item.code"
+            >
+              <el-radio :label="item.code" :checked="item.isRight"> </el-radio>
               <span
                 ><el-input
-                  v-model="form.Ainput"
+                  v-model="item.title"
                   placeholder="请输入内容"
                 ></el-input
               ></span>
-              <UploadImg></UploadImg>
-            </div>
-            <div class="options-group">
-              <el-radio label="B"></el-radio>
-              <el-input
-                v-model="form.Binput"
-                placeholder="请输入内容"
-              ></el-input>
-              <UploadImg></UploadImg>
-            </div>
-
-            <div class="options-group">
-              <el-radio label="C"> </el-radio>
-              <el-input
-                v-model="form.Cinput"
-                placeholder="请输入内容"
-              ></el-input>
-              <UploadImg></UploadImg>
-            </div>
-            <div class="options-group">
-              <el-radio label="D"></el-radio>
-              <el-input
-                v-model="form.Dinput"
-                placeholder="请输入内容"
-              ></el-input>
               <UploadImg></UploadImg>
             </div>
           </el-radio-group>
         </el-form-item>
+        <!-- 多选表单 -->
         <el-form-item label="选项" v-if="isShowS">
-          <el-checkbox-group v-model="form.options">
-            <div class="options-group">
-              <el-checkbox label="A"> </el-checkbox>
+          <el-checkbox-group v-model="form.checkbox">
+            <div
+              class="options-group"
+              v-for="item in form.options"
+              :key="item.code"
+            >
+              <el-checkbox v-model="item.isRight" style="width: 48px">{{
+                item.code + ":"
+              }}</el-checkbox>
               <span
                 ><el-input
-                  v-model="form.Ainput"
+                  v-model="item.title"
                   placeholder="请输入内容"
                 ></el-input
               ></span>
               <UploadImg></UploadImg>
             </div>
-            <div class="options-group">
-              <el-checkbox label="B"></el-checkbox>
-              <el-input
-                v-model="form.Binput"
-                placeholder="请输入内容"
-              ></el-input>
-              <UploadImg></UploadImg>
-            </div>
-
-            <div class="options-group">
-              <el-checkbox label="C"> </el-checkbox>
-              <el-input
-                v-model="form.Cinput"
-                placeholder="请输入内容"
-              ></el-input>
-              <UploadImg></UploadImg>
-            </div>
-            <div class="options-group">
-              <el-checkbox label="D"></el-checkbox>
-              <el-input
-                v-model="form.Dinput"
-                placeholder="请输入内容"
-              ></el-input>
-              <UploadImg></UploadImg>
-            </div>
           </el-checkbox-group>
         </el-form-item>
-        <el-button type="danger" :disabled="isDisabled" v-if="addShow"
+        <el-button
+          type="danger"
+          :disabled="isDisabled"
+          v-if="addShow"
+          @click="addOptions"
           >+增加选项与答案</el-button
         >
         <el-form-item label="解析视频">
-          <el-input v-model="form.name"></el-input>
+          <el-input v-model="form.videoURL"></el-input>
         </el-form-item>
-        <el-form-item label="答案解析" class="local-quill-editor">
+        <el-form-item label="答案解析" class="local-quill-editor" prop="answer">
           <quill-editor
             ref="myLQuillEditor"
-            v-model="form.parse"
-            :options="form.editorOption"
+            v-model="form.answer"
+            :options="editorOption"
             class="editor"
             @blur="onEditorBlur"
             @focus="onEditorFocus"
@@ -192,10 +164,10 @@
           </quill-editor>
         </el-form-item>
         <el-form-item label="题目备注">
-          <el-input type="textarea" v-model="form.desc"></el-input>
+          <el-input type="textarea" v-model="form.remarks"></el-input>
         </el-form-item>
         <el-form-item label="试题标签">
-          <el-select v-model="form.region" placeholder="请选择">
+          <el-select v-model="form.tags" placeholder="请选择">
             <el-option
               v-for="item in tagList"
               :key="item.value"
@@ -221,6 +193,7 @@ import "quill/dist/quill.bubble.css";
 import { quillEditor } from "vue-quill-editor";
 import { toolbarOptions } from "../tools";
 import { simple as simpleList } from "@/api/hmmm/subjects.js";
+import { add as addBaseQuestions } from "@/api/hmmm/questions.js";
 import { simple as directorySimpleList } from "@/api/hmmm/directorys";
 import { list as companysList } from "@/api/hmmm/companys.js";
 import { provinces, citys } from "@/api/hmmm/citys";
@@ -233,6 +206,7 @@ export default {
   name: "question-new",
   data() {
     return {
+      checkIndex: 0,
       isShow: true,
       isShowS: false,
       isDisabled: true,
@@ -241,42 +215,82 @@ export default {
       areaList: [],
       directionList: [],
       subjectDirection: [],
-
+      radioSelect: "",
+      checkbox: [],
+      checkboxList: ["A", "B", "C", "D"],
       value: "",
       subjectsList: [],
       companysList: [],
       tagList: [],
       form: {
-        Ainput: "",
-        Binput: "",
-        Cinput: "",
-        Dinput: "",
-        catalog: "",
-        company: "",
-        name: "",
-        city: "",
-        area: "",
-        direction: "",
-        remind: "单选",
-        difficulty: "",
-        options: "",
-        subjects: "",
-        date1: "",
-        date2: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: "",
-        stem: "",
-        parse: "",
-        editorOption: {
-          modules: {
-            toolbar: toolbarOptions,
-          },
-          theme: "snow",
-          placeholder: "请输入正文",
-          // Some Quill optiosn...
+        subjectID: "", //学科
+        catalogID: "", // 目录
+        enterpriseID: "", //企业
+        province: "", // 城市
+        city: "", // 地区
+        direction: "", //方向
+        questionType: "单选", //题型
+        difficulty: "简单", //难度
+        question: "", //题干
+        options: [
+          //选项
+          { code: "A", title: "", img: "", isRight: false }, // code 代码 title 标题
+          { code: "B", title: "", img: "", isRight: false }, // img 图片URL isRight 是否是正确答案
+          { code: "C", title: "", img: "", isRight: false },
+          { code: "D", title: "", img: "", isRight: false },
+        ],
+        videoURL: "", //解析视频
+        answer: "", //答案解析
+        remarks: "", //题目备注
+        tags: "", //试题标签
+      },
+      editorOption: {
+        modules: {
+          toolbar: toolbarOptions,
         },
+        theme: "snow",
+        placeholder: "请输入正文",
+        // Some Quill optiosn...
+      },
+      rules: {
+        subjectID: [
+          { required: true, message: "请选择学科", trigger: "change" },
+        ],
+        catalogID: [
+          { required: true, message: "请选择目录", trigger: "change" },
+        ],
+        enterpriseID: [
+          { required: true, message: "请选择企业", trigger: "change" },
+        ],
+        province: [
+          {
+            required: true,
+            message: "请选择城市",
+            trigger: "change",
+          },
+        ],
+        city: [
+          {
+            required: true,
+            message: "请选择地区",
+            trigger: "change",
+          },
+        ],
+        direction: [
+          { required: true, message: "请选择方向", trigger: "change" },
+        ],
+        questionType: [
+          { required: true, message: "请选择题目类型", trigger: "change" },
+        ],
+        difficulty: [
+          { required: true, message: "请选择困难程度", trigger: "change" },
+        ],
+        question: [
+          { required: true, message: "请输入题干", trigger: "change" },
+        ],
+        answer: [
+          { required: true, message: "请输入答案解析", trigger: "change" },
+        ],
       },
     };
   },
@@ -293,8 +307,41 @@ export default {
     // console.log(direction);
   },
   methods: {
-    onSubmit() {
-      console.log("submit!");
+    async onSubmit() {
+      await this.$refs.form.validate();
+      if ((this.form.difficulty = "简单")) {
+        this.form.difficulty = "1";
+      }
+      if ((this.form.difficulty = "一般")) {
+        this.form.difficulty = "2";
+      }
+      if ((this.form.difficulty = "困难")) {
+        this.form.difficulty = "3";
+      }
+      if ((this.form.questionType = "单选")) {
+        this.form.questionType = "1";
+      }
+      if ((this.form.questionType = "多选")) {
+        this.form.questionType = "2";
+      }
+      if ((this.form.questionType = "简答")) {
+        this.form.questionType = "3";
+      }
+      // console.log(this.radioSelect);
+      this.form.options.forEach((item) => {
+        if (item.code === this.radioSelect) {
+          item.isRight = true;
+        }
+      });
+      console.log(this.form.options);
+      try {
+        await addBaseQuestions(this.form);
+        this.$message.success("添加成功");
+        console.log(222);
+        this.$refs.resetFields();
+        this.form = [];
+        this.$router.push("/questions/list");
+      } catch (error) {}
     },
     // 失去焦点事件
     onEditorBlur(e) {
@@ -329,7 +376,7 @@ export default {
     },
     areaFn() {
       // console.log(11);
-      this.areaList = citys(this.form.city);
+      this.areaList = citys(this.form.province);
       // console.log(this.areaList);
     },
     async subjectFn(val) {
@@ -355,6 +402,25 @@ export default {
           (this.isDisabled = false);
         this.addShow = false;
       }
+    },
+    addOptions() {
+      console.log(111);
+      const moreCheckboxList = [
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+      ];
+
+      this.checkboxList.push(moreCheckboxList[this.checkIndex]);
+      console.log(this.checkboxList);
+      this.checkIndex++;
     },
   },
 };
