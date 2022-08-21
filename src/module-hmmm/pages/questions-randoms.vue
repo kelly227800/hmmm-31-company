@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <template>
   <div class="container" style="padding: 10px; background-color: #f0f2f5">
     <div class="content">
@@ -289,3 +290,5 @@ export default {
   align-items: center;
 }
 </style>
+=======
+>>>>>>> feature/questions-new
