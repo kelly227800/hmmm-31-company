@@ -14,11 +14,18 @@
       </div>
       <!-- 表格 -->
       <el-table
+        v-loading="loading"
+        element-loading-text="拼命加载中..."
         :data="tableData"
         style="width: 100%; margin-bottom: 20px"
         row-key="id"
         default-expand-all
         :tree-props="{ children: 'childs', hasChildren: 'hasChildren' }"
+        :header-cell-style="{
+          background: '#f4f4f5',
+          color: '#909399',
+          'text-align': 'center',
+        }"
       >
         <el-table-column label="标题" width="180">
           <template slot-scope="{ row }">
@@ -73,7 +80,7 @@
     <AddMenu
       v-if="visibleMenu"
       :visibleMenu.sync="visibleMenu"
-      :tableData="tableData"
+      :tableData="dialogTreeTable"
       @addSuccess="getMenusList"
       :editRow="editRow"
     ></AddMenu>
@@ -92,6 +99,8 @@ export default {
         children: "childs", //绑定childs为孩子
       },
       editRow: {}, // 编辑项
+      dialogTreeTable: [],
+      loading: false,
     };
   },
   components: {
@@ -100,15 +109,24 @@ export default {
   created() {
     this.getMenusList();
   },
+  mounted() {
+    this.$message.success(" 刘超  ，代码和我总得跑一个");
+  },
 
   methods: {
     // 获取菜单列表
     async getMenusList() {
+      this.loading = true;
+
       const { data } = await list();
       const res = JSON.stringify(data);
       // console.log(res);
       const reg1 = /points/gi; // 定义正则
       this.tableData = JSON.parse(res.replace(reg1, "childs")); // 截取points替换为childs
+      this.dialogTreeTable = [
+        { id: 0, title: "主导航", childs: [...this.tableData] },
+      ]; // 截取points替换为childs
+      this.loading = false;
     },
     addMenu() {
       this.editRow = {};
@@ -119,14 +137,20 @@ export default {
       this.visibleMenu = true;
     },
     async delUser(row) {
-      try {
-        // console.log(row.id);
-        await remove(row);
-        this.$message.success("删除成功");
-        this.getMenusList();
-      } catch (error) {
-        this.$message.error("删除失败，请重试");
-      }
+      this.$confirm("此操作将永久删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(async () => {
+        try {
+          // console.log(row.id);
+          await remove(row);
+          this.$message.success("删除成功");
+          this.getMenusList();
+        } catch (error) {
+          this.$message.error("删除失败，请重试");
+        }
+      });
     },
   },
 };

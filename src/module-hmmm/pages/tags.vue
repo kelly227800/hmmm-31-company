@@ -170,6 +170,7 @@ export default {
       pagesize: 10,
       subjectID: "",
       isTo: false,
+      isDel: false,
       isEdit: false,
       showTagDialog: false,
       delTagDialog: false,
@@ -221,12 +222,15 @@ export default {
     // 删除标签
     async confirmDel() {
       try {
+        this.isDel = true;
         await remove({ id: Number(this.id) });
         this.delTagDialog = false;
         this.$message.success("操作成功");
         this.getTagsList();
       } catch (err) {
         this.$message.error("操作失败");
+      } finally {
+        this.isDel = false;
       }
     },
     // 改变标签状态
@@ -254,6 +258,10 @@ export default {
     // 获取标签列表
     async getTagsList() {
       let query = {};
+      // 如果删除时页面只剩一条数据
+      if (this.isDel && this.tableData.length == 1) {
+        this.page--;
+      }
       // 非学科跳转过来
       if (!this.isTo) {
         // 搜索框无关键字
@@ -350,6 +358,8 @@ export default {
     this.getTagsList();
     this.$notify({
       title: "金倩倩",
+      type: 'success',
+      duration: 3000
     });
   },
   components: {

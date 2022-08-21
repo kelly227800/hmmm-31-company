@@ -145,6 +145,7 @@ export default {
       page: 1,
       pagesize: 20,
       keyword: "",
+      isDel: false,
       delRandomsDialog: false,
       showQuestionsPreview: false,
     };
@@ -155,6 +156,7 @@ export default {
   methods: {
     // 点击搜索根据编号查询
     onSearch() {
+      this.page = 1;
       this.keyword = this.randomsForm.value;
       this.getData();
     },
@@ -166,17 +168,23 @@ export default {
     // 删除组题列表
     async confirmDel() {
       try {
+        this.isDel = true;
         await removeRandoms({ id: this.id });
         this.$message.success("删除成功");
         this.getData();
       } catch (err) {
         this.$message.error("删除失败");
       } finally {
+        this.isDel = false;
         this.delRandomsDialog = false;
       }
     },
     // 获取组题数据
     async getData() {
+      // 如果删除时页面只剩一条数据
+      if (this.isDel && this.randomsList.length == 1) {
+        this.page--;
+      }
       try {
         const query = {
           page: this.page,
@@ -216,13 +224,17 @@ export default {
     },
     // 获取试题详情数据
     async getQuestionsDetail(questionId) {
-      const { data } = await detail({ id: questionId });
-      this.questionDetail = data;
-      console.log(this.questionDetail);
+      try {
+        const { data } = await detail({ id: questionId });
+        this.questionDetail = data;
+        console.log(this.questionDetail);
+        this.showQuestionsPreview = true;
+      } catch (err) {
+        this.$message.error("获取试题数据失败");
+      }
     },
-    // 点击试题编号 显示试题预览框
+    // 点击试题编号
     clickQuestion(questionIDs, e) {
-      this.showQuestionsPreview = true;
       let number = e.target.innerHTML;
       let item = questionIDs.find((item) => item.number === number);
       let questionId = item.id;
@@ -234,6 +246,8 @@ export default {
     this.getData();
     this.$notify({
       title: "金倩倩",
+      type: "success",
+      duration: 3000,
     });
   },
 };

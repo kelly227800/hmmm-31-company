@@ -30,7 +30,17 @@
         <template #title>共 {{ total }} 条记录 </template>
       </el-alert>
       <!-- 表格 -->
-      <el-table :data="tableData" style="width: 100%">
+      <el-table
+        v-loading="loading"
+        element-loading-text="拼命加载中..."
+        :data="tableData"
+        style="width: 100%"
+        :header-cell-style="{
+          background: '#f4f4f5',
+          color: '#909399',
+          'text-align': 'center',
+        }"
+      >
         <el-table-column align="center" prop="id" label="序号">
         </el-table-column>
         <el-table-column align="center" prop="email" label="邮箱">
@@ -137,6 +147,7 @@ export default {
       //
       tableData: [],
       userItem: {},
+      loading: false,
     };
   },
   components: {
@@ -145,15 +156,20 @@ export default {
   },
   created() {
     this.getUserList();
+    // this.$message.success(" 刘超  ，代码和我总得跑一个");
   },
-
+  mounted() {
+    this.$message.success(" 刘超  ，代码和我总得跑一个");
+  },
   methods: {
     // 获取用户列表
     async getUserList() {
+      this.loading = true;
       const { data } = await list(this.params);
       // console.log(data);
       this.tableData = data.list;
       this.total = data.counts;
+      this.loading = false;
     },
     // 更改每一页多少条的时候触发
     handleSizeChange(val) {
@@ -188,9 +204,23 @@ export default {
     },
     // 删除用户
     async delUser(row) {
-      await remove(row);
-      this.$message.success("用户已删除");
-      this.getUserList();
+      this.$confirm("此操作将永久删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(async () => {
+        await remove(row);
+        this.$message.success("用户已删除");
+        // 一页删除完  就显示上一页
+        if (this.tableData.length === 1) {
+          console.log(this.params.page);
+          this.params.page--;
+          console.log(this.params.page);
+          this.getUserList();
+        } else {
+          this.getUserList();
+        }
+      });
     },
   },
 };
@@ -200,7 +230,7 @@ export default {
 .box-card {
   width: 100%;
   height: 100%;
-  background-color: pink;
+  background-color: #fff;
   // 搜索框
   .userSerch {
     display: flex;

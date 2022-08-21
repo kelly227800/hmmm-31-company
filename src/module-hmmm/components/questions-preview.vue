@@ -48,7 +48,9 @@
               v-for="item in questionDetail.options"
               :key="item.id"
             >
-              <el-radio :label="item.title"></el-radio>
+              <el-radio
+                :label="item.title.trim().length == 0 ? item.code : item.title"
+              ></el-radio>
             </div>
           </el-radio-group>
         </div>
@@ -61,7 +63,9 @@
               v-for="item in questionDetail.options"
               :key="item.id"
             >
-              <el-checkbox :label="item.title"></el-checkbox>
+              <el-checkbox
+                :label="item.title.trim().length == 0 ? item.code : item.title"
+              ></el-checkbox>
             </div>
           </el-checkbox-group>
         </div>
@@ -150,7 +154,7 @@ export default {
     radio: {
       get() {
         let obj = this.questionDetail.options.find((item) => item.isRight == 1);
-        return obj ? obj.title : "未知";
+        return obj.title.trim().length == 0 ? obj.code : obj.title;
       },
       set(val) {},
     },
@@ -159,7 +163,11 @@ export default {
         const arr = [];
         this.questionDetail.options.forEach((item) => {
           if (item.isRight == 1) {
-            arr.push(item.title);
+            if (item.title.trim().length == 0) {
+              arr.push(item.code);
+            } else {
+              arr.push(item.title);
+            }
           }
         });
         // console.log(arr);
