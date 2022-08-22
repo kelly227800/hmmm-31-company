@@ -154,7 +154,7 @@ export default {
     radio: {
       get() {
         let obj = this.questionDetail.options.find((item) => item.isRight == 1);
-        return obj.title.trim().length == 0 ? obj.code : obj.title;
+        return obj?.title.trim().length == 0 ? obj.code : obj.title;
       },
       set(val) {},
     },
