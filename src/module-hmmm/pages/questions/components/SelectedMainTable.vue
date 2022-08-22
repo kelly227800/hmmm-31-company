@@ -163,14 +163,13 @@ export default {
       this.getchoice();
     },
     async Previewfn(id) {
-      this.showQuestionsPreview = true;
       const { data } = await detail({ id });
       this.questionDetail = data;
       console.log(this.questionDetail.videoURL);
       if (!this.questionDetail.videoURL?.endsWith(".mp4")) {
         this.questionDetail.videoURL = "https://v-cdn.zjol.com.cn/277004.mp4";
       }
-    },
+      this.showQuestionsPreview = true;    },
     upgo(id) {
       this.$router.push({
         name: "questions-new",

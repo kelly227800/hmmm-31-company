@@ -60,12 +60,8 @@
         align="center"
         :formatter="forchkType"
       ></el-table-column>
-      <el-table-column
-        label="审核意见"
-        align="center"
-        width="180px"
-      >
-      <template slot-scope="{ row }">
+      <el-table-column label="审核意见" align="center" width="180px">
+        <template slot-scope="{ row }">
           <div v-html="row.remarks"></div>
         </template>
       </el-table-column>
@@ -125,7 +121,7 @@
       v-if="centerDialogVisible"
       :centerDialogVisible.sync="centerDialogVisible"
       :Auditid="Auditid"
-      @updata="getchoice"
+      @updata="updata"
     />
     <QuestionsPreview
       v-if="showQuestionsPreview"
@@ -231,13 +227,15 @@ export default {
       this.getchoice();
     },
     async Previewfn(id) {
-      this.showQuestionsPreview = true;
-      const { data } = await detail({ id });
-      this.questionDetail = data;
-      console.log(this.questionDetail.videoURL.endsWith(".mp4"));
-      if (!this.questionDetail.videoURL.endsWith(".mp4")) {
-        this.questionDetail.videoURL = "https://v-cdn.zjol.com.cn/277004.mp4";
-      }
+      try {
+        const { data } = await detail({ id });
+        this.questionDetail = data;
+        console.log(this.questionDetail.videoURL.endsWith(".mp4"));
+        if (!this.questionDetail.videoURL.endsWith(".mp4")) {
+          this.questionDetail.videoURL = "https://v-cdn.zjol.com.cn/277004.mp4";
+        }
+        this.showQuestionsPreview = true;
+      } catch (error) {}
     },
     upgo(id, publishState) {
       if (publishState === 0) {
@@ -262,70 +260,64 @@ export default {
               message: "删除成功!",
             });
             if (this.tableData.length === 1) {
-            this.params.page--;
-            this.getchoice();
-          } else {
-            this.getchoice();
-          }
+              this.params.page--;
+              this.getchoice();
+            } else {
+              this.getchoice();
+            }
           })
-          .catch(() => {
-            // this.$message({
-            //   type: "info",
-            //   message: "已取消删除",
-            // });
-          });
+          .catch(() => {});
       }
     },
     async Shelves(id) {
-      this.$confirm("您确认上架这道题目吗?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      })
-        .then(async () => {
-          console.log(id);
-          await choicePublish({ id, publishState: 1 });
-
-          this.$message({
-            type: "success",
-            message: "上架成功!",
-          });
-          this.getchoice();
+      const index = this.tableData.findIndex((item) => item.id === id);
+      if (this.tableData[index].chkState === 1) {
+        this.$confirm("您确认上架这道题目吗?", "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
         })
-        .catch(() => {
-          // this.$message({
-          //   type: "info",
-          //   message: "已取消删除",
-          // });
-        });
+          .then(async () => {
+            await choicePublish({ id, publishState: 1 });
+            this.$message({
+              type: "success",
+              message: "上架成功!",
+            });
+            this.getchoice();
+          })
+          .catch(() => {});
+      } else {
+        this.$message.success("审核通过后才可以上架");
+      }
     },
     async Takeitdown(id) {
-      this.$confirm("您确认上架这道题目吗?", "提示", {
+      this.$confirm("您确认下架这道题目吗?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning",
       })
         .then(async () => {
-          console.log(id);
           await choicePublish({ id, publishState: 0 });
-
           this.$message({
             type: "success",
             message: "下架成功!",
           });
           this.getchoice();
         })
-        .catch(() => {
-          // this.$message({
-          //   type: "info",
-          //   message: "已取消删除",
-          // });
-        });
+        .catch(() => {});
     },
     Audit(id, chkState) {
       if (chkState === 0) {
         this.centerDialogVisible = true;
         this.Auditid = id;
+      }
+    },
+    updata() {
+      if (this.tableData.length === 1) {
+        this.params.page--;
+        this.getchoice();
+      } else {
+        this.getchoice();
       }
     },
   },
