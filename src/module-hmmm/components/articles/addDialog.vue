@@ -45,6 +45,7 @@
 </template>
 <script>
 import { add, update } from "@/api/hmmm/articles.js";
+import hljs from "highlight.js";
 const toolbarOptions = [
   ["bold", "italic", "underline", "strike"], // 加粗 斜体 下划线 删除线
   [{ list: "ordered" }, { list: "bullet" }], // 有序、无序列表
@@ -82,6 +83,11 @@ export default {
         modules: {
           toolbar: {
             container: toolbarOptions,
+          },
+          syntax: {
+            highlight: (text) => {
+              return hljs.highlightAuto(text).value;
+            },
           },
         },
       },
