@@ -193,12 +193,13 @@ import "quill/dist/quill.bubble.css";
 import { quillEditor } from "vue-quill-editor";
 import { toolbarOptions } from "../tools";
 import { simple as simpleList } from "@/api/hmmm/subjects.js";
-import { add as addBaseQuestions } from "@/api/hmmm/questions.js";
+import { add as addBaseQuestions, detail } from "@/api/hmmm/questions.js";
 import { simple as directorySimpleList } from "@/api/hmmm/directorys";
 import { list as companysList } from "@/api/hmmm/companys.js";
 import { provinces, citys } from "@/api/hmmm/citys";
 import { direction } from "@/api/hmmm/constants";
 import { simple as simpleTagList } from "@/api/hmmm/tags";
+import hljs from "highlight.js";
 
 // 工具栏配置项
 
@@ -246,7 +247,14 @@ export default {
       },
       editorOption: {
         modules: {
-          toolbar: toolbarOptions,
+          toolbar: {
+            container: toolbarOptions,
+          },
+          syntax: {
+            highlight: (text) => {
+              return hljs.highlightAuto(text).value;
+            },
+          },
         },
         theme: "snow",
         placeholder: "请输入正文",
@@ -305,8 +313,16 @@ export default {
     this.directionList = direction;
     // console.log(this.directionList);
     // console.log(direction);
+    console.log(this.$route.query.id);
+    this.edit();
   },
   methods: {
+    async edit() {
+      if (this.$route.query.id) {
+        const { data } = await detail({ id: this.$route.query.id });
+        this.form = data;
+      }
+    },
     async onSubmit() {
       await this.$refs.form.validate();
       if ((this.form.difficulty = "简单")) {
