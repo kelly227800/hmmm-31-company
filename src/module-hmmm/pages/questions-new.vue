@@ -311,9 +311,6 @@ export default {
     this.getCompanysList();
     this.getProvincesList();
     this.directionList = direction;
-    // console.log(this.directionList);
-    // console.log(direction);
-    console.log(this.$route.query.id);
     this.edit();
   },
   methods: {
