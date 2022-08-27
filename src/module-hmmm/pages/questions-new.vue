@@ -128,7 +128,7 @@
               v-for="item in form.options"
               :key="item.code"
             >
-              <el-checkbox v-model="item.isRight" style="width: 48px">{{
+              <el-checkbox :label="item.code" style="width: 48px">{{
                 item.code + ":"
               }}</el-checkbox>
               <span
@@ -435,7 +435,12 @@ export default {
         "N",
       ];
 
-      this.checkboxList.push(moreCheckboxList[this.checkIndex]);
+      this.form.options.push({
+        code: moreCheckboxList[this.checkIndex],
+        title: "",
+        img: "",
+        isRight: false,
+      });
       console.log(this.checkboxList);
       this.checkIndex++;
     },
